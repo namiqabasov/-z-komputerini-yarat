@@ -47,8 +47,20 @@ export default function UserAuth({ onAuthSuccess }) {
         });
 
         if (error) throw error;
-        if (data.session && onAuthSuccess) {
-          onAuthSuccess(data.session);
+
+        if (data.session) {
+          // Check if this email/user belongs to the admins table
+          const { data: isAdmin } = await supabase.rpc('is_admin');
+
+          if (isAdmin) {
+            // Sign out immediately and block login from general user form
+            await supabase.auth.signOut();
+            throw new Error("Təhlükəsizlik Xəbərdarlığı: Admin hesabları ilə adi istifadəçi girişindən daxil olmaq qadağandır!");
+          }
+
+          if (onAuthSuccess) {
+            onAuthSuccess(data.session);
+          }
         }
       }
     } catch (err) {
