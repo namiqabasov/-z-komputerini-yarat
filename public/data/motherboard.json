@@ -1,0 +1,154 @@
+[
+  {
+    "id": "mb-1",
+    "name": "ASUS PRIME B450M-K II",
+    "brand": "ASUS",
+    "price": 140,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "AM4",
+      "chipset": "AMD B450",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX",
+      "ramSlots": 2
+    },
+    "compatibility": {
+      "socket": "AM4",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX"
+    }
+  },
+  {
+    "id": "mb-2",
+    "name": "MSI B550M PRO-VDH WIFI",
+    "brand": "MSI",
+    "price": 240,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "AM4",
+      "chipset": "AMD B550",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "AM4",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX"
+    }
+  },
+  {
+    "id": "mb-3",
+    "name": "GIGABYTE B650 GAMING X AX",
+    "brand": "GIGABYTE",
+    "price": 420,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "AM5",
+      "chipset": "AMD B650",
+      "ramType": "DDR5",
+      "formFactor": "ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "AM5",
+      "ramType": "DDR5",
+      "formFactor": "ATX"
+    }
+  },
+  {
+    "id": "mb-4",
+    "name": "ASUS ROG STRIX X670E-F GAMING",
+    "brand": "ASUS",
+    "price": 850,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "AM5",
+      "chipset": "AMD X670E",
+      "ramType": "DDR5",
+      "formFactor": "ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "AM5",
+      "ramType": "DDR5",
+      "formFactor": "ATX"
+    }
+  },
+  {
+    "id": "mb-5",
+    "name": "GIGABYTE H610M H DDR4",
+    "brand": "GIGABYTE",
+    "price": 165,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "LGA1700",
+      "chipset": "Intel H610",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX",
+      "ramSlots": 2
+    },
+    "compatibility": {
+      "socket": "LGA1700",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX"
+    }
+  },
+  {
+    "id": "mb-6",
+    "name": "MSI PRO B760M-A WIFI DDR4",
+    "brand": "MSI",
+    "price": 310,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "LGA1700",
+      "chipset": "Intel B760",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "LGA1700",
+      "ramType": "DDR4",
+      "formFactor": "Micro-ATX"
+    }
+  },
+  {
+    "id": "mb-7",
+    "name": "ASUS TUF GAMING B760-PLUS WIFI DDR5",
+    "brand": "ASUS",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "LGA1700",
+      "chipset": "Intel B760",
+      "ramType": "DDR5",
+      "formFactor": "ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "LGA1700",
+      "ramType": "DDR5",
+      "formFactor": "ATX"
+    }
+  },
+  {
+    "id": "mb-8",
+    "name": "MSI MPG Z790 CARBON WIFI",
+    "brand": "MSI",
+    "price": 920,
+    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80",
+    "specs": {
+      "socket": "LGA1700",
+      "chipset": "Intel Z790",
+      "ramType": "DDR5",
+      "formFactor": "ATX",
+      "ramSlots": 4
+    },
+    "compatibility": {
+      "socket": "LGA1700",
+      "ramType": "DDR5",
+      "formFactor": "ATX"
+    }
+  }
+]

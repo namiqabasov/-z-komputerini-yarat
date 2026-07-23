@@ -1,0 +1,138 @@
+[
+  {
+    "id": "case-1",
+    "name": "Deepcool CC560 ARGB Tempered Glass Mid-Tower",
+    "brand": "Deepcool",
+    "price": 135,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "ATX / Micro-ATX / Mini-ITX",
+      "sidePanel": "Tempered Glass",
+      "includedFans": "4x 120mm ARGB",
+      "color": "Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#00f0ff"
+    }
+  },
+  {
+    "id": "case-2",
+    "name": "Cougar Duoface RGB White Mid-Tower",
+    "brand": "Cougar",
+    "price": 160,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "ATX / Micro-ATX",
+      "sidePanel": "Tempered Glass",
+      "includedFans": "2x 140mm ARGB",
+      "color": "White"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#ffffff"
+    }
+  },
+  {
+    "id": "case-3",
+    "name": "NZXT H5 Flow RGB Black",
+    "brand": "NZXT",
+    "price": 240,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "ATX / Micro-ATX",
+      "sidePanel": "Tempered Glass",
+      "includedFans": "2x 140mm RGB + 2x 120mm",
+      "color": "Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#7000ff"
+    }
+  },
+  {
+    "id": "case-4",
+    "name": "Corsair 4000D Airflow Tempered Glass",
+    "brand": "Corsair",
+    "price": 230,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "ATX / Micro-ATX",
+      "sidePanel": "Tempered Glass",
+      "includedFans": "2x 120mm AirGuide",
+      "color": "Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#ff0055"
+    }
+  },
+  {
+    "id": "case-5",
+    "name": "Lian Li O11 Dynamic EVO Black",
+    "brand": "Lian Li",
+    "price": 420,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "E-ATX / ATX / Micro-ATX",
+      "sidePanel": "Dual Tempered Glass",
+      "includedFans": "None",
+      "color": "Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["E-ATX", "ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#00ff88"
+    }
+  },
+  {
+    "id": "case-6",
+    "name": "ASUS TUF Gaming GT502 White",
+    "brand": "ASUS",
+    "price": 390,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "ATX / Micro-ATX",
+      "sidePanel": "Dual Tempered Glass",
+      "includedFans": "None",
+      "color": "White"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#ffcc00"
+    }
+  },
+  {
+    "id": "case-7",
+    "name": "Deepcool MATREXX 40 3FS Micro-ATX",
+    "brand": "Deepcool",
+    "price": 95,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "Micro-ATX / Mini-ITX",
+      "sidePanel": "Tempered Glass",
+      "includedFans": "3x 120mm Tri-color LED",
+      "color": "Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#00f0ff"
+    }
+  },
+  {
+    "id": "case-8",
+    "name": "HYTE Y60 Panoramic View Red/Black",
+    "brand": "HYTE",
+    "price": 510,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "formFactor": "E-ATX / ATX / Micro-ATX",
+      "sidePanel": "3-Piece Panoramic Glass",
+      "includedFans": "3x 120mm",
+      "color": "Red/Black"
+    },
+    "compatibility": {
+      "supportedFormFactors": ["E-ATX", "ATX", "Micro-ATX", "Mini-ITX"],
+      "rgbColor": "#ff0055"
+    }
+  }
+]

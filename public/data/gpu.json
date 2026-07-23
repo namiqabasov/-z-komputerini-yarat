@@ -1,0 +1,146 @@
+[
+  {
+    "id": "gpu-1",
+    "name": "NVIDIA GeForce RTX 3060 12GB",
+    "brand": "NVIDIA",
+    "price": 620,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "12 GB GDDR6",
+      "bus": "192-bit",
+      "powerRequirement": "550W",
+      "length": "242 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 550,
+      "color": "cyan"
+    }
+  },
+  {
+    "id": "gpu-2",
+    "name": "NVIDIA GeForce RTX 4060 8GB",
+    "brand": "NVIDIA",
+    "price": 690,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "8 GB GDDR6",
+      "bus": "128-bit",
+      "powerRequirement": "550W",
+      "length": "210 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 550,
+      "color": "cyan"
+    }
+  },
+  {
+    "id": "gpu-3",
+    "name": "NVIDIA GeForce RTX 4070 Super 12GB",
+    "brand": "NVIDIA",
+    "price": 1380,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "12 GB GDDR6X",
+      "bus": "192-bit",
+      "powerRequirement": "650W",
+      "length": "267 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 650,
+      "color": "purple"
+    }
+  },
+  {
+    "id": "gpu-4",
+    "name": "NVIDIA GeForce RTX 4080 Super 16GB",
+    "brand": "NVIDIA",
+    "price": 2450,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "16 GB GDDR6X",
+      "bus": "256-bit",
+      "powerRequirement": "750W",
+      "length": "304 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 750,
+      "color": "pink"
+    }
+  },
+  {
+    "id": "gpu-5",
+    "name": "AMD Radeon RX 6600 8GB",
+    "brand": "AMD",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "8 GB GDDR6",
+      "bus": "128-bit",
+      "powerRequirement": "500W",
+      "length": "200 mm",
+      "rgb": "No"
+    },
+    "compatibility": {
+      "minPsuWatts": 500,
+      "color": "red"
+    }
+  },
+  {
+    "id": "gpu-6",
+    "name": "AMD Radeon RX 7700 XT 12GB",
+    "brand": "AMD",
+    "price": 950,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "12 GB GDDR6",
+      "bus": "192-bit",
+      "powerRequirement": "700W",
+      "length": "267 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 700,
+      "color": "red"
+    }
+  },
+  {
+    "id": "gpu-7",
+    "name": "AMD Radeon RX 7900 XTX 24GB",
+    "brand": "AMD",
+    "price": 2200,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "24 GB GDDR6",
+      "bus": "384-bit",
+      "powerRequirement": "850W",
+      "length": "287 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 850,
+      "color": "red"
+    }
+  },
+  {
+    "id": "gpu-8",
+    "name": "NVIDIA GeForce RTX 4090 24GB",
+    "brand": "NVIDIA",
+    "price": 4200,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "vram": "24 GB GDDR6X",
+      "bus": "384-bit",
+      "powerRequirement": "850W",
+      "length": "304 mm",
+      "rgb": "Yes"
+    },
+    "compatibility": {
+      "minPsuWatts": 850,
+      "color": "gold"
+    }
+  }
+]

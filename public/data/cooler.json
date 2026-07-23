@@ -1,0 +1,138 @@
+[
+  {
+    "id": "cooler-1",
+    "name": "Deepcool AG400 ARGB Single-Tower Air Cooler",
+    "brand": "Deepcool",
+    "price": 55,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "Air Cooler",
+      "fanSpeed": "2000 RPM",
+      "noise": "31.6 dBA",
+      "tdpRating": "220W",
+      "rgb": "ARGB"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-2",
+    "name": "Thermalright Peerless Assassin 120 SE ARGB",
+    "brand": "Thermalright",
+    "price": 95,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "Dual-Tower Air Cooler",
+      "fanSpeed": "1550 RPM",
+      "noise": "25.6 dBA",
+      "tdpRating": "265W",
+      "rgb": "ARGB"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-3",
+    "name": "Deepcool AK620 Digital Air Cooler with Screen",
+    "brand": "Deepcool",
+    "price": 175,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "Dual-Tower Air Cooler",
+      "fanSpeed": "1850 RPM",
+      "noise": "28 dBA",
+      "tdpRating": "260W",
+      "display": "Real-time Temp Display"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-4",
+    "name": "Deepcool LS520 SE 240mm Liquid Cooler",
+    "brand": "Deepcool",
+    "price": 190,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "240mm AIO Liquid Cooler",
+      "fanSpeed": "2250 RPM",
+      "noise": "32.9 dBA",
+      "radiatorSize": "240 mm",
+      "rgb": "ARGB Infinity Mirror"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-5",
+    "name": "NZXT Kraken 240 RGB Liquid Cooler with Screen",
+    "brand": "NZXT",
+    "price": 380,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "240mm AIO Liquid Cooler",
+      "fanSpeed": "2000 RPM",
+      "noise": "30.6 dBA",
+      "radiatorSize": "240 mm",
+      "display": "1.54\" LCD Display"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-6",
+    "name": "Arctic Liquid Freezer III 360 A-RGB",
+    "brand": "Arctic",
+    "price": 280,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "360mm AIO Liquid Cooler",
+      "fanSpeed": "2000 RPM",
+      "noise": "22.5 dBA",
+      "radiatorSize": "360 mm",
+      "rgb": "A-RGB"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-7",
+    "name": "ASUS ROG Ryujin III 360 ARGB Liquid Cooler",
+    "brand": "ASUS",
+    "price": 720,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "360mm AIO Liquid Cooler",
+      "fanSpeed": "2200 RPM",
+      "noise": "36.45 dBA",
+      "radiatorSize": "360 mm",
+      "display": "3.5\" Full-Color LCD"
+    },
+    "compatibility": {
+      "sockets": ["AM4", "AM5", "LGA1700"]
+    }
+  },
+  {
+    "id": "cooler-8",
+    "name": "Intel Stock Cooler Standard",
+    "brand": "Intel",
+    "price": 20,
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
+    "specs": {
+      "type": "Stock Air Cooler",
+      "fanSpeed": "2000 RPM",
+      "noise": "32 dBA",
+      "tdpRating": "65W",
+      "rgb": "No"
+    },
+    "compatibility": {
+      "sockets": ["LGA1700"]
+    }
+  }
+]

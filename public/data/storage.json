@@ -1,0 +1,130 @@
+[
+  {
+    "id": "st-1",
+    "name": "Kingston NV2 1TB NVMe PCIe 4.0 SSD",
+    "brand": "Kingston",
+    "price": 125,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "1 TB",
+      "interface": "NVMe M.2 PCIe 4.0",
+      "readSpeed": "3500 MB/s",
+      "writeSpeed": "2100 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-2",
+    "name": "Samsung 980 1TB NVMe M.2 SSD",
+    "brand": "Samsung",
+    "price": 165,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "1 TB",
+      "interface": "NVMe M.2 PCIe 3.0",
+      "readSpeed": "3500 MB/s",
+      "writeSpeed": "3000 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-3",
+    "name": "Samsung 990 PRO 2TB NVMe PCIe 4.0 SSD",
+    "brand": "Samsung",
+    "price": 380,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "2 TB",
+      "interface": "NVMe M.2 PCIe 4.0",
+      "readSpeed": "7450 MB/s",
+      "writeSpeed": "6900 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-4",
+    "name": "Western Digital Black SN850X 1TB",
+    "brand": "Western Digital",
+    "price": 210,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "1 TB",
+      "interface": "NVMe M.2 PCIe 4.0",
+      "readSpeed": "7300 MB/s",
+      "writeSpeed": "6300 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-5",
+    "name": "Crucial P3 500GB NVMe M.2 SSD",
+    "brand": "Crucial",
+    "price": 85,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "500 GB",
+      "interface": "NVMe M.2 PCIe 3.0",
+      "readSpeed": "3500 MB/s",
+      "writeSpeed": "1900 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-6",
+    "name": "Seagate Barracuda 2TB 3.5\" HDD",
+    "brand": "Seagate",
+    "price": 115,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "2 TB",
+      "interface": "SATA III 6Gb/s",
+      "speed": "7200 RPM",
+      "cache": "256 MB"
+    },
+    "compatibility": {
+      "formFactor": "3.5 inch"
+    }
+  },
+  {
+    "id": "st-7",
+    "name": "Lexar NM790 2TB NVMe PCIe 4.0",
+    "brand": "Lexar",
+    "price": 310,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "2 TB",
+      "interface": "NVMe M.2 PCIe 4.0",
+      "readSpeed": "7400 MB/s",
+      "writeSpeed": "6500 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "M.2 2280"
+    }
+  },
+  {
+    "id": "st-8",
+    "name": "Kingston A400 480GB 2.5\" SATA SSD",
+    "brand": "Kingston",
+    "price": 65,
+    "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&q=80",
+    "specs": {
+      "capacity": "480 GB",
+      "interface": "SATA III 2.5\"",
+      "readSpeed": "500 MB/s",
+      "writeSpeed": "450 MB/s"
+    },
+    "compatibility": {
+      "formFactor": "2.5 inch"
+    }
+  }
+]

@@ -1,0 +1,85 @@
+/* Responsive Design Enhancements */
+@media (max-width: 1024px) {
+  .header-container,
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .catalog-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .select-wrapper {
+    flex: 1;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-title {
+    font-size: 1.05rem;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .hero-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .hero-banner {
+    padding: 2rem 1rem;
+  }
+
+  .builder-header-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .part-slot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .slot-selected-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .slot-icon-name {
+    min-width: auto;
+  }
+
+  .add-part-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-content {
+    max-height: 90vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-btn span {
+    display: none;
+  }
+
+  .nav-btn {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .filter-group {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "psu-1",
+    "name": "Deepcool PF550 550W 80 PLUS",
+    "brand": "Deepcool",
+    "price": 95,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "550W",
+      "efficiency": "80 PLUS",
+      "modularity": "Non-Modular",
+      "fanSize": "120 mm"
+    },
+    "compatibility": {
+      "wattage": 550
+    }
+  },
+  {
+    "id": "psu-2",
+    "name": "Corsair CV650 650W 80 PLUS Bronze",
+    "brand": "Corsair",
+    "price": 140,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "650W",
+      "efficiency": "80 PLUS Bronze",
+      "modularity": "Non-Modular",
+      "fanSize": "120 mm"
+    },
+    "compatibility": {
+      "wattage": 650
+    }
+  },
+  {
+    "id": "psu-3",
+    "name": "Deepcool PK750D 750W 80 PLUS Bronze",
+    "brand": "Deepcool",
+    "price": 175,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "750W",
+      "efficiency": "80 PLUS Bronze",
+      "modularity": "Non-Modular",
+      "fanSize": "120 mm"
+    },
+    "compatibility": {
+      "wattage": 750
+    }
+  },
+  {
+    "id": "psu-4",
+    "name": "Corsair RM750e 750W 80 PLUS Gold Fully Modular ATX 3.0",
+    "brand": "Corsair",
+    "price": 260,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "750W",
+      "efficiency": "80 PLUS Gold",
+      "modularity": "Fully Modular",
+      "fanSize": "120 mm"
+    },
+    "compatibility": {
+      "wattage": 750
+    }
+  },
+  {
+    "id": "psu-5",
+    "name": "ASUS TUF Gaming 850W Gold",
+    "brand": "ASUS",
+    "price": 320,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "850W",
+      "efficiency": "80 PLUS Gold",
+      "modularity": "Fully Modular",
+      "fanSize": "135 mm"
+    },
+    "compatibility": {
+      "wattage": 850
+    }
+  },
+  {
+    "id": "psu-6",
+    "name": "MSI MAG A850GL PCIE5 850W 80 PLUS Gold",
+    "brand": "MSI",
+    "price": 290,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "850W",
+      "efficiency": "80 PLUS Gold",
+      "modularity": "Fully Modular",
+      "fanSize": "120 mm"
+    },
+    "compatibility": {
+      "wattage": 850
+    }
+  },
+  {
+    "id": "psu-7",
+    "name": "Seasonic Focus GX-1000 1000W 80 PLUS Gold",
+    "brand": "Seasonic",
+    "price": 450,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "1000W",
+      "efficiency": "80 PLUS Gold",
+      "modularity": "Fully Modular",
+      "fanSize": "135 mm"
+    },
+    "compatibility": {
+      "wattage": 1000
+    }
+  },
+  {
+    "id": "psu-8",
+    "name": "Corsair HX1200 1200W 80 PLUS Platinum",
+    "brand": "Corsair",
+    "price": 620,
+    "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&q=80",
+    "specs": {
+      "wattage": "1200W",
+      "efficiency": "80 PLUS Platinum",
+      "modularity": "Fully Modular",
+      "fanSize": "135 mm"
+    },
+    "compatibility": {
+      "wattage": 1200
+    }
+  }
+]

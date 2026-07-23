@@ -1,0 +1,130 @@
+[
+  {
+    "id": "ram-1",
+    "name": "Kingston Fury Beast 16GB (2x8GB) DDR4 3200MHz",
+    "brand": "Kingston",
+    "price": 85,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "16 GB (2x8GB)",
+      "type": "DDR4",
+      "speed": "3200 MHz",
+      "latency": "CL16"
+    },
+    "compatibility": {
+      "ramType": "DDR4"
+    }
+  },
+  {
+    "id": "ram-2",
+    "name": "Corsair Vengeance LPX 32GB (2x16GB) DDR4 3600MHz",
+    "brand": "Corsair",
+    "price": 160,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "32 GB (2x16GB)",
+      "type": "DDR4",
+      "speed": "3600 MHz",
+      "latency": "CL18"
+    },
+    "compatibility": {
+      "ramType": "DDR4"
+    }
+  },
+  {
+    "id": "ram-3",
+    "name": "G.Skill Trident Z RGB 32GB (2x16GB) DDR4 3600MHz",
+    "brand": "G.Skill",
+    "price": 210,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "32 GB (2x16GB)",
+      "type": "DDR4",
+      "speed": "3600 MHz",
+      "latency": "CL16"
+    },
+    "compatibility": {
+      "ramType": "DDR4"
+    }
+  },
+  {
+    "id": "ram-4",
+    "name": "Crucial 16GB DDR5 4800MHz",
+    "brand": "Crucial",
+    "price": 110,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "16 GB (1x16GB)",
+      "type": "DDR5",
+      "speed": "4800 MHz",
+      "latency": "CL40"
+    },
+    "compatibility": {
+      "ramType": "DDR5"
+    }
+  },
+  {
+    "id": "ram-5",
+    "name": "Kingston Fury Beast 32GB (2x16GB) DDR5 6000MHz",
+    "brand": "Kingston",
+    "price": 260,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "32 GB (2x16GB)",
+      "type": "DDR5",
+      "speed": "6000 MHz",
+      "latency": "CL36"
+    },
+    "compatibility": {
+      "ramType": "DDR5"
+    }
+  },
+  {
+    "id": "ram-6",
+    "name": "G.Skill Trident Z5 RGB 32GB (2x16GB) DDR5 6400MHz",
+    "brand": "G.Skill",
+    "price": 340,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "32 GB (2x16GB)",
+      "type": "DDR5",
+      "speed": "6400 MHz",
+      "latency": "CL32"
+    },
+    "compatibility": {
+      "ramType": "DDR5"
+    }
+  },
+  {
+    "id": "ram-7",
+    "name": "Corsair Dominator Titanium 64GB (2x32GB) DDR5 6000MHz",
+    "brand": "Corsair",
+    "price": 680,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "64 GB (2x32GB)",
+      "type": "DDR5",
+      "speed": "6000 MHz",
+      "latency": "CL30"
+    },
+    "compatibility": {
+      "ramType": "DDR5"
+    }
+  },
+  {
+    "id": "ram-8",
+    "name": "TeamGroup T-Force Delta RGB 32GB (2x16GB) DDR5 6000MHz",
+    "brand": "TeamGroup",
+    "price": 275,
+    "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&q=80",
+    "specs": {
+      "capacity": "32 GB (2x16GB)",
+      "type": "DDR5",
+      "speed": "6000 MHz",
+      "latency": "CL30"
+    },
+    "compatibility": {
+      "ramType": "DDR5"
+    }
+  }
+]
