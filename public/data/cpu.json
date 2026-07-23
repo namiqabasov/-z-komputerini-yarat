@@ -4,7 +4,7 @@
     "name": "AMD Ryzen 5 5600",
     "brand": "AMD",
     "price": 240,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "6 Cores / 12 Threads",
       "clock": "3.5 GHz (Boost 4.4 GHz)",
@@ -23,7 +23,7 @@
     "name": "AMD Ryzen 7 5700X",
     "brand": "AMD",
     "price": 350,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "8 Cores / 16 Threads",
       "clock": "3.4 GHz (Boost 4.6 GHz)",
@@ -42,7 +42,7 @@
     "name": "AMD Ryzen 5 7600",
     "brand": "AMD",
     "price": 430,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "6 Cores / 12 Threads",
       "clock": "3.8 GHz (Boost 5.1 GHz)",
@@ -61,7 +61,7 @@
     "name": "AMD Ryzen 7 7800X3D",
     "brand": "AMD",
     "price": 890,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "8 Cores / 16 Threads",
       "clock": "4.2 GHz (Boost 5.0 GHz)",
@@ -80,7 +80,7 @@
     "name": "Intel Core i5-12400F",
     "brand": "Intel",
     "price": 270,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "6 Cores / 12 Threads",
       "clock": "2.5 GHz (Boost 4.4 GHz)",
@@ -99,7 +99,7 @@
     "name": "Intel Core i5-13400F",
     "brand": "Intel",
     "price": 380,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "10 Cores (6P + 4E) / 16 Threads",
       "clock": "2.5 GHz (Boost 4.6 GHz)",
@@ -118,7 +118,7 @@
     "name": "Intel Core i7-13700K",
     "brand": "Intel",
     "price": 790,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "16 Cores (8P + 8E) / 24 Threads",
       "clock": "3.4 GHz (Boost 5.4 GHz)",
@@ -137,7 +137,7 @@
     "name": "Intel Core i9-14900K",
     "brand": "Intel",
     "price": 1250,
-    "image": "https://www.cats.org.uk/media/13139/220325case013.jpg",
+    "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&q=80",
     "specs": {
       "cores": "24 Cores (8P + 16E) / 32 Threads",
       "clock": "3.2 GHz (Boost 6.0 GHz)",
