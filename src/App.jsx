@@ -11,7 +11,6 @@ import LightAdminDashboard from './admin/LightAdminDashboard';
 import { supabase } from './supabaseClient';
 
 function App() {
-  // Current active view/route: 'home', 'builder', 'profile', 'auth', 'admin-secret'
   const [activeTab, setActiveTab] = useState('home');
   const [session, setSession] = useState(null);
   const [isAdminSession, setIsAdminSession] = useState(false);
@@ -29,6 +28,8 @@ function App() {
   });
 
   // Check URL pathname for hidden admin route on load
+  const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
+
   useEffect(() => {
     if (window.location.pathname === '/admin-panel-gizli-yol') {
       setActiveTab('admin-secret');
@@ -83,6 +84,19 @@ function App() {
     setActiveTab('home');
   };
 
+  // If on secret admin login page and NOT logged in as admin, render full standalone page without Header/Footer
+  if (isSecretAdminRoute && !isAdminSession) {
+    return (
+      <SecretAdminLogin 
+        onAdminLoginSuccess={(sess) => {
+          setSession(sess);
+          setIsAdminSession(true);
+          setActiveTab('admin-secret');
+        }} 
+      />
+    );
+  }
+
   return (
     <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header 
@@ -121,16 +135,9 @@ function App() {
           <UserAuth onAuthSuccess={() => setActiveTab('profile')} />
         )}
 
-        {/* Hidden Admin Route (/admin-panel-gizli-yol) */}
-        {activeTab === 'admin-secret' && (
-          isAdminSession ? (
-            <LightAdminDashboard session={session} onLogout={handleLogout} />
-          ) : (
-            <SecretAdminLogin onAdminLoginSuccess={(sess) => {
-              setSession(sess);
-              setIsAdminSession(true);
-            }} />
-          )
+        {/* Secret Admin Dashboard (When Authenticated as Admin) */}
+        {activeTab === 'admin-secret' && isAdminSession && (
+          <LightAdminDashboard session={session} onLogout={handleLogout} />
         )}
       </main>
 
@@ -146,7 +153,6 @@ function App() {
             setActiveTab('auth');
           }}
           onSuccess={() => {
-            // Reset build after successful order
             setSelectedParts({
               cpu: null, motherboard: null, gpu: null, ram: null,
               storage: null, psu: null, case: null, cooler: null
