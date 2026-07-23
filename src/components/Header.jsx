@@ -1,8 +1,8 @@
 import React from 'react';
-import { Cpu, ShoppingBag, Wrench, Sparkles, Layers } from 'lucide-react';
+import { Cpu, ShoppingBag, Wrench, User, ShieldCheck } from 'lucide-react';
 import './Header.css';
 
-export default function Header({ activeTab, setActiveTab }) {
+export default function Header({ activeTab, setActiveTab, session, isAdminSession }) {
   return (
     <header className="app-header">
       <div className="header-container">
@@ -31,6 +31,26 @@ export default function Header({ activeTab, setActiveTab }) {
             <Wrench size={18} />
             <span>PC Builder</span>
           </button>
+
+          <button 
+            className={`nav-btn ${activeTab === 'profile' || activeTab === 'auth' ? 'active' : ''}`}
+            onClick={() => setActiveTab(session ? 'profile' : 'auth')}
+          >
+            <User size={18} />
+            <span>{session ? 'Hesabım' : 'Giriş / Qeydiyyat'}</span>
+          </button>
+
+          {/* Show hidden admin access indicator if already logged in as super-admin */}
+          {isAdminSession && (
+            <button 
+              className={`nav-btn ${activeTab === 'admin-secret' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin-secret')}
+              style={{ borderColor: '#ef4444', color: '#ef4444' }}
+            >
+              <ShieldCheck size={18} />
+              <span>Admin Panel</span>
+            </button>
+          )}
         </nav>
       </div>
     </header>

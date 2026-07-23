@@ -1,0 +1,146 @@
+.payment-modal {
+  max-width: 600px !important;
+}
+
+.payment-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bank-info-box {
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.bank-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  color: var(--accent-cyan);
+}
+
+.bank-info-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.bank-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.detail-row strong {
+  color: var(--text-main);
+}
+
+.card-number-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-num {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: var(--accent-cyan);
+  letter-spacing: 1px;
+}
+
+.copy-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.total-highlight {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.pay-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent-green);
+}
+
+.receipt-dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+}
+
+.receipt-dropzone:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.03);
+}
+
+.upload-icon {
+  color: var(--accent-cyan);
+}
+
+.upload-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.upload-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.upload-status {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--accent-cyan);
+  margin-top: 0.5rem;
+}
+
+.receipt-preview-badge {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid var(--accent-green);
+  color: var(--accent-green);
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 0.75rem;
+}

@@ -15,7 +15,7 @@ const CATEGORIES = [
   { id: 'cooler', name: 'Soyuducu (Cooler)', icon: <Thermometer size={18} /> }
 ];
 
-export default function PcBuilder({ selectedParts, setSelectedParts }) {
+export default function PcBuilder({ selectedParts, setSelectedParts, onOpenCheckout }) {
   const [partData, setPartData] = useState({});
   const [activeModalCat, setActiveModalCat] = useState(null);
   const [warnings, setWarnings] = useState([]);
@@ -295,9 +295,9 @@ export default function PcBuilder({ selectedParts, setSelectedParts }) {
             <button 
               className="checkout-btn"
               disabled={selectedCount === 0}
-              onClick={() => alert(`Yığılan PC-nin ümumi qiyməti: ${totalPrice} AZN. Sifarişiniz qeydə alındı!`)}
+              onClick={() => onOpenCheckout ? onOpenCheckout() : alert(`Yığılan PC-nin ümumi qiyməti: ${totalPrice} AZN`)}
             >
-              Sifarişi Yadda Saxla
+              Sifariş Et Və Ödəniş
             </button>
           </div>
         </div>

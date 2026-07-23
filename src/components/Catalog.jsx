@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { Search, Filter, Cpu, Monitor, Database, MemoryStick, HardDrive, Zap, Box, Thermometer, ArrowUpDown } from 'lucide-react';
 import ProductCard from './ProductCard';
 import './Catalog.css';
@@ -24,29 +25,41 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
   const [sortBy, setSortBy] = useState('featured');
 
   useEffect(() => {
-    async function loadData() {
+    async function loadDataFromSupabase() {
       setLoading(true);
       try {
-        const catList = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooler'];
-        let loaded = [];
+        // Try fetching from Supabase first
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
-        for (const cat of catList) {
-          const res = await fetch(`/data/${cat}.json`);
-          if (res.ok) {
-            const items = await res.json();
-            const tagged = items.map(item => ({ ...item, category: cat }));
-            loaded = [...loaded, ...tagged];
+        if (!error && data && data.length > 0) {
+          setProducts(data);
+        } else {
+          // Fallback to static JSON files if Supabase env is not configured yet
+          const catList = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooler'];
+          let loaded = [];
+
+          for (const cat of catList) {
+            const res = await fetch(`/data/${cat}.json`);
+            if (res.ok) {
+              const items = await res.json();
+              const tagged = items.map(item => ({ ...item, category: cat }));
+              loaded = [...loaded, ...tagged];
+            }
           }
+          setProducts(loaded);
         }
-        setProducts(loaded);
       } catch (err) {
-        console.error("Xəta baş verdi:", err);
+        console.error("Supabase data load error:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadData();
+    loadDataFromSupabase();
   }, []);
 
   const availableBrands = Array.from(new Set(products.map(p => p.brand))).filter(Boolean);
@@ -78,7 +91,7 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
         </div>
       </div>
 
-      {/* Control Bar: Categories & Search */}
+      {/* Control Bar */}
       <div className="catalog-controls">
         <div className="search-box">
           <Search size={18} className="search-icon" />

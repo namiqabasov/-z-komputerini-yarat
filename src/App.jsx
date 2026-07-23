@@ -3,9 +3,20 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Catalog from './components/Catalog';
 import PcBuilder from './components/PcBuilder';
+import UserAuth from './user/UserAuth';
+import UserProfile from './user/UserProfile';
+import PaymentModal from './user/PaymentModal';
+import SecretAdminLogin from './admin/SecretAdminLogin';
+import LightAdminDashboard from './admin/LightAdminDashboard';
+import { supabase } from './supabaseClient';
 
 function App() {
+  // Current active view/route: 'home', 'builder', 'profile', 'auth', 'admin-secret'
   const [activeTab, setActiveTab] = useState('home');
+  const [session, setSession] = useState(null);
+  const [isAdminSession, setIsAdminSession] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
   const [selectedParts, setSelectedParts] = useState({
     cpu: null,
     motherboard: null,
@@ -17,6 +28,45 @@ function App() {
     cooler: null
   });
 
+  // Check URL pathname for hidden admin route on load
+  useEffect(() => {
+    if (window.location.pathname === '/admin-panel-gizli-yol') {
+      setActiveTab('admin-secret');
+    }
+  }, []);
+
+  // Listen to Supabase Auth State
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      checkAdminRole(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      checkAdminRole(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const checkAdminRole = async (userSession) => {
+    if (!userSession) {
+      setIsAdminSession(false);
+      return;
+    }
+    try {
+      const { data: isAdmin, error } = await supabase.rpc('is_admin');
+      if (!error && isAdmin) {
+        setIsAdminSession(true);
+      } else {
+        setIsAdminSession(false);
+      }
+    } catch (e) {
+      setIsAdminSession(false);
+    }
+  };
+
   const handleSelectPartFromCatalog = (product) => {
     if (!product || !product.category) return;
     setSelectedParts(prev => ({
@@ -26,23 +76,86 @@ function App() {
     setActiveTab('builder');
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setIsAdminSession(false);
+    setActiveTab('home');
+  };
+
   return (
     <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        session={session}
+        isAdminSession={isAdminSession}
+      />
+
       <main style={{ flex: 1, maxWidth: '1280px', margin: '0 auto', width: '100%', padding: '2rem 1.5rem' }}>
-        {activeTab === 'home' ? (
+        {activeTab === 'home' && (
           <Catalog 
             onNavigateToBuilder={() => setActiveTab('builder')}
             selectedParts={selectedParts}
             onSelectPart={handleSelectPartFromCatalog}
           />
-        ) : (
+        )}
+
+        {activeTab === 'builder' && (
           <PcBuilder 
             selectedParts={selectedParts}
             setSelectedParts={setSelectedParts}
+            onOpenCheckout={() => setIsPaymentModalOpen(true)}
           />
         )}
+
+        {activeTab === 'profile' && (
+          session ? (
+            <UserProfile session={session} onLogout={handleLogout} />
+          ) : (
+            <UserAuth onAuthSuccess={() => setActiveTab('profile')} />
+          )
+        )}
+
+        {activeTab === 'auth' && (
+          <UserAuth onAuthSuccess={() => setActiveTab('profile')} />
+        )}
+
+        {/* Hidden Admin Route (/admin-panel-gizli-yol) */}
+        {activeTab === 'admin-secret' && (
+          isAdminSession ? (
+            <LightAdminDashboard session={session} onLogout={handleLogout} />
+          ) : (
+            <SecretAdminLogin onAdminLoginSuccess={(sess) => {
+              setSession(sess);
+              setIsAdminSession(true);
+            }} />
+          )
+        )}
       </main>
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && (
+        <PaymentModal 
+          session={session}
+          selectedParts={selectedParts}
+          totalPrice={Object.values(selectedParts).reduce((sum, i) => sum + (i ? i.price : 0), 0)}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onRequireLogin={() => {
+            setIsPaymentModalOpen(false);
+            setActiveTab('auth');
+          }}
+          onSuccess={() => {
+            // Reset build after successful order
+            setSelectedParts({
+              cpu: null, motherboard: null, gpu: null, ram: null,
+              storage: null, psu: null, case: null, cooler: null
+            });
+            setActiveTab('profile');
+          }}
+        />
+      )}
+
       <Footer />
     </div>
   );
