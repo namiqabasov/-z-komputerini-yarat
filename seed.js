@@ -6,15 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Read credentials from .env or process.env
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
-  console.log("ℹ️ QEYD: .env faylında real Supabase URL və Anon Key daxil edilənə qədər seed skripti gözləmədədir.");
-  console.log("Lütfən .env faylına VITE_SUPABASE_URL və VITE_SUPABASE_ANON_KEY daxil edin.");
-  process.exit(0);
-}
+// Explicit credentials
+const supabaseUrl = 'https://efqjgtdpkiqgyameyavn.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmcWpndGRwa2lxZ3lhbWV5YXZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3ODI1OTIsImV4cCI6MjEwMDM1ODU5Mn0._onRhB1Pd7ZNR6KlQg00jCnPbZmH_LEcJYHNBYbBmnY';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
