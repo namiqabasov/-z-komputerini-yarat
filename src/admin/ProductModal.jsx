@@ -62,6 +62,13 @@ export default function ProductModal({ editingProduct, onClose, onRefresh }) {
     }
   }, [editingProduct]);
 
+  // Confirm close on 'X' button or Cancel button
+  const handleSafeClose = () => {
+    if (window.confirm("Dəyişikliklər yadda saxlanılmayacaq. Bağlamağa əminsiniz?")) {
+      onClose();
+    }
+  };
+
   // Handle File Upload to Supabase Storage
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -81,7 +88,6 @@ export default function ProductModal({ editingProduct, onClose, onRefresh }) {
 
       if (uploadError) throw uploadError;
 
-      // Get Public URL
       const { data: publicUrlData } = supabase.storage
         .from('product-images')
         .getPublicUrl(filePath);
@@ -138,7 +144,7 @@ export default function ProductModal({ editingProduct, onClose, onRefresh }) {
       if (error) throw error;
 
       onRefresh();
-      onClose();
+      onClose(); // Automatically close modal after saving
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
@@ -147,11 +153,11 @@ export default function ProductModal({ editingProduct, onClose, onRefresh }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={(e) => e.stopPropagation()}>
       <div className="modal-content admin-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{editingProduct ? 'Məhsulu Redaktə Et' : 'Yeni Məhsul Əlavə Et'}</h3>
-          <button className="close-modal-btn" onClick={onClose}>&times;</button>
+          <button className="close-modal-btn" onClick={handleSafeClose}>&times;</button>
         </div>
 
         {errorMsg && (
@@ -270,7 +276,7 @@ export default function ProductModal({ editingProduct, onClose, onRefresh }) {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="cancel-btn" onClick={onClose}>Ləğv Et</button>
+            <button type="button" className="cancel-btn" onClick={handleSafeClose}>Ləğv Et</button>
             <button type="submit" className="save-btn" disabled={saving}>
               <Save size={16} />
               <span>{saving ? 'Yadda saxlanılır...' : 'Yadda Saxla'}</span>

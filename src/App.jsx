@@ -27,7 +27,6 @@ function App() {
     cooler: null
   });
 
-  // Check URL pathname for hidden admin route on load
   const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
 
   useEffect(() => {
@@ -84,19 +83,28 @@ function App() {
     setActiveTab('home');
   };
 
-  // If on secret admin login page and NOT logged in as admin, render full standalone page without Header/Footer
-  if (isSecretAdminRoute && !isAdminSession) {
+  // IF ADMIN ROUTE (GIZLI ROUTE OR ADMIN DASHBOARD): Render fully isolated layout without public Header and Footer
+  if (isSecretAdminRoute) {
+    if (!isAdminSession) {
+      return (
+        <SecretAdminLogin 
+          onAdminLoginSuccess={(sess) => {
+            setSession(sess);
+            setIsAdminSession(true);
+            setActiveTab('admin-secret');
+          }} 
+        />
+      );
+    }
+
     return (
-      <SecretAdminLogin 
-        onAdminLoginSuccess={(sess) => {
-          setSession(sess);
-          setIsAdminSession(true);
-          setActiveTab('admin-secret');
-        }} 
-      />
+      <div className="admin-standalone-wrapper" style={{ minHeight: '100vh', background: '#f8fafc', padding: '1.5rem' }}>
+        <LightAdminDashboard session={session} onLogout={handleLogout} />
+      </div>
     );
   }
 
+  // PUBLIC SITE LAYOUT (with Header & Footer)
   return (
     <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header 
@@ -133,11 +141,6 @@ function App() {
 
         {activeTab === 'auth' && (
           <UserAuth onAuthSuccess={() => setActiveTab('profile')} />
-        )}
-
-        {/* Secret Admin Dashboard (When Authenticated as Admin) */}
-        {activeTab === 'admin-secret' && isAdminSession && (
-          <LightAdminDashboard session={session} onLogout={handleLogout} />
         )}
       </main>
 

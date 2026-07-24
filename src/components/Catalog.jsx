@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { Search, Filter, Cpu, Monitor, Database, MemoryStick, HardDrive, Zap, Box, Thermometer, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, Cpu, Monitor, Database, MemoryStick, HardDrive, Zap, Box, Thermometer, ArrowUpDown, ChevronDown } from 'lucide-react';
 import ProductCard from './ProductCard';
 import './Catalog.css';
 
@@ -16,30 +16,50 @@ const CATEGORIES = [
   { id: 'cooler', name: 'Soyuducu (Cooler)', icon: <Thermometer size={16} /> }
 ];
 
+const PAGE_SIZE = 15;
+
 export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSelectPart }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
+  // Fetch initial products or on filter change
   useEffect(() => {
-    async function loadDataFromSupabase() {
+    async function loadInitialProducts() {
       setLoading(true);
+      setPage(0);
+      setHasMore(true);
+
       try {
-        // Try fetching from Supabase first
-        const { data, error } = await supabase
+        let query = supabase
           .from('products')
           .select('*')
           .eq('is_active', true)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range(0, PAGE_SIZE - 1);
 
-        if (!error && data && data.length > 0) {
+        if (activeCategory !== 'all') {
+          query = query.eq('category', activeCategory);
+        }
+
+        const { data, error } = await query;
+
+        if (!error && data) {
           setProducts(data);
+          if (data.length < PAGE_SIZE) {
+            setHasMore(false);
+          }
         } else {
-          // Fallback to static JSON files if Supabase env is not configured yet
-          const catList = ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooler'];
+          // Fallback to static JSON if Supabase table empty or error
+          const catList = activeCategory === 'all' 
+            ? ['cpu', 'gpu', 'motherboard', 'ram', 'storage', 'psu', 'case', 'cooler']
+            : [activeCategory];
           let loaded = [];
 
           for (const cat of catList) {
@@ -50,7 +70,8 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
               loaded = [...loaded, ...tagged];
             }
           }
-          setProducts(loaded);
+          setProducts(loaded.slice(0, PAGE_SIZE));
+          setHasMore(loaded.length > PAGE_SIZE);
         }
       } catch (err) {
         console.error("Supabase data load error:", err);
@@ -59,18 +80,58 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
       }
     }
 
-    loadDataFromSupabase();
-  }, []);
+    loadInitialProducts();
+  }, [activeCategory]);
+
+  // Load more 15 items on button click
+  const handleLoadMore = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+
+    const nextPage = page + 1;
+    const from = nextPage * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (activeCategory !== 'all') {
+        query = query.eq('category', activeCategory);
+      }
+
+      const { data, error } = await query;
+
+      if (!error && data) {
+        if (data.length === 0) {
+          setHasMore(false);
+        } else {
+          setProducts(prev => [...prev, ...data]);
+          setPage(nextPage);
+          if (data.length < PAGE_SIZE) {
+            setHasMore(false);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Load more error:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const availableBrands = Array.from(new Set(products.map(p => p.brand))).filter(Boolean);
 
   const filteredProducts = products.filter(product => {
-    const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           product.brand.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesBrand = selectedBrand === 'all' || product.brand.toLowerCase() === selectedBrand.toLowerCase();
 
-    return matchesCategory && matchesSearch && matchesBrand;
+    return matchesSearch && matchesBrand;
   }).sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
@@ -152,20 +213,50 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
           <p>Axtarış sorğusunu və ya süzgəcləri dəyişdirərək yenidən cəhd edin.</p>
         </div>
       ) : (
-        <div className="product-grid">
-          {filteredProducts.map(product => {
-            const isSelected = selectedParts[product.category]?.id === product.id;
-            return (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                category={product.category}
-                isSelected={isSelected}
-                onSelect={onSelectPart}
-              />
-            );
-          })}
-        </div>
+        <>
+          <div className="product-grid">
+            {filteredProducts.map(product => {
+              const isSelected = selectedParts[product.category]?.id === product.id;
+              return (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  category={product.category}
+                  isSelected={isSelected}
+                  onSelect={onSelectPart}
+                />
+              );
+            })}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+              <button 
+                onClick={handleLoadMore} 
+                disabled={loadingMore}
+                style={{
+                  background: 'rgba(0, 240, 255, 0.1)',
+                  border: '1px solid var(--accent-cyan)',
+                  color: 'var(--accent-cyan)',
+                  padding: '0.85rem 2.5rem',
+                  borderRadius: '10px',
+                  fontSize: '0.95rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: 'var(--glow-cyan)',
+                  transition: 'all 0.25s ease'
+                }}
+              >
+                <ChevronDown size={18} />
+                <span>{loadingMore ? 'Yüklənir...' : 'Daha çox göstər'}</span>
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
