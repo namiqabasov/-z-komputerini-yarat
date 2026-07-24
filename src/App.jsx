@@ -14,6 +14,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [session, setSession] = useState(null);
   const [isAdminSession, setIsAdminSession] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const [selectedParts, setSelectedParts] = useState({
@@ -35,19 +36,47 @@ function App() {
     }
   }, []);
 
-  // Listen to Supabase Auth State
+  // Listen to Supabase Auth State with strict loading flag
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      checkAdminRole(session);
+    let mounted = true;
+
+    async function initAuth() {
+      setAuthLoading(true);
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(currentSession);
+          if (currentSession) {
+            await checkAdminRole(currentSession);
+          } else {
+            setIsAdminSession(false);
+          }
+        }
+      } catch (e) {
+        console.error("Auth init error:", e);
+      } finally {
+        if (mounted) setAuthLoading(false);
+      }
+    }
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      if (!mounted) return;
+      setAuthLoading(true);
+      setSession(newSession);
+      if (newSession) {
+        await checkAdminRole(newSession);
+      } else {
+        setIsAdminSession(false);
+      }
+      setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      checkAdminRole(session);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkAdminRole = async (userSession) => {
@@ -77,14 +106,32 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    setIsAdminSession(false);
-    setActiveTab('home');
+    setAuthLoading(true);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Logout error:", e);
+    } finally {
+      // Clear all local & session storage auth tokens
+      localStorage.clear();
+      sessionStorage.clear();
+      setSession(null);
+      setIsAdminSession(false);
+      setAuthLoading(false);
+      setActiveTab('home');
+    }
   };
 
   // IF ADMIN ROUTE (GIZLI ROUTE OR ADMIN DASHBOARD): Render fully isolated layout without public Header and Footer
   if (isSecretAdminRoute) {
+    if (authLoading) {
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#38bdf8' }}>
+          <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Təhlükəsiz Giriş Yoxlanılır...</p>
+        </div>
+      );
+    }
+
     if (!isAdminSession) {
       return (
         <SecretAdminLogin 
@@ -112,6 +159,7 @@ function App() {
         setActiveTab={setActiveTab} 
         session={session}
         isAdminSession={isAdminSession}
+        authLoading={authLoading}
       />
 
       <main style={{ flex: 1, maxWidth: '1280px', margin: '0 auto', width: '100%', padding: '2rem 1.5rem' }}>
@@ -132,7 +180,9 @@ function App() {
         )}
 
         {activeTab === 'profile' && (
-          session ? (
+          authLoading ? (
+            <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Hesab məlumatları yüklənir...</div>
+          ) : session ? (
             <UserProfile session={session} onLogout={handleLogout} />
           ) : (
             <UserAuth onAuthSuccess={() => setActiveTab('profile')} />

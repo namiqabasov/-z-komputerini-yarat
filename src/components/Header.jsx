@@ -1,8 +1,8 @@
 import React from 'react';
-import { Cpu, ShoppingBag, Wrench, User, ShieldCheck } from 'lucide-react';
+import { Cpu, ShoppingBag, Wrench, User, ShieldCheck, Loader2 } from 'lucide-react';
 import './Header.css';
 
-export default function Header({ activeTab, setActiveTab, session, isAdminSession }) {
+export default function Header({ activeTab, setActiveTab, session, isAdminSession, authLoading }) {
   return (
     <header className="app-header">
       <div className="header-container">
@@ -32,16 +32,20 @@ export default function Header({ activeTab, setActiveTab, session, isAdminSessio
             <span>PC Builder</span>
           </button>
 
+          {/* User Account / Auth Button with Loading Guard */}
           <button 
             className={`nav-btn ${activeTab === 'profile' || activeTab === 'auth' ? 'active' : ''}`}
             onClick={() => setActiveTab(session ? 'profile' : 'auth')}
+            disabled={authLoading}
           >
             <User size={18} />
-            <span>{session ? 'Hesabım' : 'Giriş / Qeydiyyat'}</span>
+            <span>
+              {authLoading ? '...' : session ? 'Hesabım' : 'Giriş / Qeydiyyat'}
+            </span>
           </button>
 
-          {/* Show hidden admin access indicator if already logged in as super-admin */}
-          {isAdminSession && (
+          {/* Show hidden admin access indicator ONLY IF auth is NOT loading AND user is super-admin */}
+          {!authLoading && isAdminSession && (
             <button 
               className={`nav-btn ${activeTab === 'admin-secret' ? 'active' : ''}`}
               onClick={() => setActiveTab('admin-secret')}
