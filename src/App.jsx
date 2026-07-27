@@ -13,25 +13,36 @@ import SecretAdminLogin from './admin/SecretAdminLogin';
 import LightAdminDashboard from './admin/LightAdminDashboard';
 import { supabase } from './supabaseClient';
 
-// Explicit CSS Imports to guarantee styling bundler inclusion during production Vercel builds
-import './components/Header.css';
-import './components/Footer.css';
-import './components/Catalog.css';
-import './components/PcBuilder.css';
-import './components/ProductCard.css';
-import './components/VisualPC.css';
-import './components/ContactPage.css';
-import './user/CartPage.css';
-import './user/WishlistPage.css';
-import './user/UserAuth.css';
-import './user/UserProfile.css';
-import './user/PaymentModal.css';
-import './admin/SecretAdminLogin.css';
-import './admin/LightAdminDashboard.css';
-import './admin/ProductModal.css';
+// Map URL paths to activeTab values
+const PATH_TO_TAB = {
+  '/': 'home',
+  '/builder': 'builder',
+  '/cart': 'cart',
+  '/wishlist': 'wishlist',
+  '/contact': 'contact',
+  '/profile': 'profile',
+  '/auth': 'auth',
+  '/admin-panel-gizli-yol': 'admin-secret'
+};
+
+const TAB_TO_PATH = {
+  'home': '/',
+  'builder': '/builder',
+  'cart': '/cart',
+  'wishlist': '/wishlist',
+  'contact': '/contact',
+  'profile': '/profile',
+  'auth': '/auth',
+  'admin-secret': '/admin-panel-gizli-yol'
+};
 
 function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home', 'builder', 'cart', 'wishlist', 'contact', 'profile', 'auth', 'admin-secret'
+  // Determine initial activeTab from window.location.pathname on load
+  const [activeTab, setActiveTabState] = useState(() => {
+    const path = window.location.pathname;
+    return PATH_TO_TAB[path] || 'home';
+  });
+
   const [session, setSession] = useState(null);
   const [isAdminSession, setIsAdminSession] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
@@ -46,14 +57,27 @@ function App() {
     storage: null, psu: null, case: null, cooler: null
   });
 
-  const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
-
-  // Check URL path on load
-  useEffect(() => {
-    if (window.location.pathname === '/admin-panel-gizli-yol') {
-      setActiveTab('admin-secret');
+  // Custom tab setter that updates URL path synchronously
+  const setActiveTab = (newTab) => {
+    setActiveTabState(newTab);
+    const targetPath = TAB_TO_PATH[newTab] || '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
     }
+  };
+
+  // Sync activeTab if user uses browser Back / Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      setActiveTabState(PATH_TO_TAB[path] || 'home');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
 
   // Fetch counts for Header badges
   const fetchHeaderCounts = async (currSession) => {

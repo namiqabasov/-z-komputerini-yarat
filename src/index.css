@@ -1,4 +1,19 @@
 @import './responsive.css';
+@import './components/Header.css';
+@import './components/Footer.css';
+@import './components/Catalog.css';
+@import './components/PcBuilder.css';
+@import './components/ProductCard.css';
+@import './components/VisualPC.css';
+@import './components/ContactPage.css';
+@import './user/CartPage.css';
+@import './user/WishlistPage.css';
+@import './user/UserAuth.css';
+@import './user/UserProfile.css';
+@import './user/PaymentModal.css';
+@import './admin/SecretAdminLogin.css';
+@import './admin/LightAdminDashboard.css';
+@import './admin/ProductModal.css';
 
 :root {
   --bg-dark: #0b0f19;
@@ -44,4 +59,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-cyan);
 }
-
