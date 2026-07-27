@@ -20,7 +20,10 @@ export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog
           .order('created_at', { ascending: false });
 
         if (!error && data) {
-          setWishlistItems(data.map(item => item.product_data));
+          const validItems = data
+            .map(item => item.product_data)
+            .filter(prod => prod && typeof prod === 'object' && prod.id);
+          setWishlistItems(validItems);
         }
       } catch (err) {
         console.error("Supabase wishlist error:", err);
@@ -29,7 +32,10 @@ export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog
       // Fetch from localStorage for anonymous user
       try {
         const local = JSON.parse(localStorage.getItem('guest_wishlist') || '[]');
-        setWishlistItems(local);
+        const validLocal = Array.isArray(local) 
+          ? local.filter(prod => prod && typeof prod === 'object' && prod.id)
+          : [];
+        setWishlistItems(validLocal);
       } catch (e) {
         setWishlistItems([]);
       }
