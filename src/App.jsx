@@ -221,6 +221,15 @@ function App() {
     }
   };
 
+  const handleSelectPartFromCatalog = (product) => {
+    if (!product || !product.category) return;
+    setSelectedParts(prev => ({
+      ...prev,
+      [product.category]: product
+    }));
+    setActiveTab('builder');
+  };
+
   const [wishlistIds, setWishlistIds] = useState([]);
 
   // Fetch wishlist IDs for visual heart toggle state
