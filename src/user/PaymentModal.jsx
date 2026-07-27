@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import { CreditCard, Upload, CheckCircle2, AlertCircle, Copy, ShieldCheck } from 'lucide-react';
 import './PaymentModal.css';
 
-export default function PaymentModal({ session, selectedParts, totalPrice, onClose, onSuccess, onRequireLogin }) {
+export default function PaymentModal({ session, cartItems = [], selectedParts = {}, totalPrice, onClose, onSuccess, onRequireLogin }) {
   const [receiptUrl, setReceiptUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -72,16 +72,32 @@ export default function PaymentModal({ session, selectedParts, totalPrice, onClo
     setErrorMsg(null);
 
     try {
-      const itemsList = Object.entries(selectedParts)
-        .filter(([_, item]) => item !== null)
-        .map(([cat, item]) => ({
-          category: cat,
-          id: item.id,
-          name: item.name,
-          price: item.price
-        }));
+      let itemsList = [];
 
-      const { data, error } = await supabase
+      if (cartItems && cartItems.length > 0) {
+        // Items coming from Cart
+        itemsList = cartItems.map(item => ({
+          id: item.id,
+          type: item.item_type,
+          data: item.item_data,
+          name: item.item_type === 'pc_build' ? (item.item_data?.build_name || 'Özəl PC Build') : item.item_data?.name,
+          price: item.price,
+          quantity: item.quantity
+        }));
+      } else if (selectedParts && Object.keys(selectedParts).length > 0) {
+        // Items coming directly from PC Builder quick checkout
+        itemsList = Object.entries(selectedParts)
+          .filter(([_, item]) => item !== null)
+          .map(([cat, item]) => ({
+            category: cat,
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: 1
+          }));
+      }
+
+      const { error } = await supabase
         .from('orders')
         .insert([{
           user_id: session.user.id,
@@ -94,6 +110,14 @@ export default function PaymentModal({ session, selectedParts, totalPrice, onClo
         }]);
 
       if (error) throw error;
+
+      // Empty user's cart in Supabase if ordered from cart
+      if (cartItems && cartItems.length > 0) {
+        await supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', session.user.id);
+      }
 
       alert("Sifarişiniz və ödəniş çeki uğurla göndərildi! Sifarişiniz təsdiqləndikdən sonra sizə bildiriş veriləcək.");
       if (onSuccess) onSuccess();
@@ -149,7 +173,7 @@ export default function PaymentModal({ session, selectedParts, totalPrice, onClo
               </div>
               <div className="detail-row total-highlight">
                 <span>Ödəniləcək Məbləğ:</span>
-                <span className="pay-amount">{totalPrice} AZN</span>
+                <span className="pay-amount">{totalPrice?.toFixed(0)} AZN</span>
               </div>
             </div>
           </div>

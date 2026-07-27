@@ -40,22 +40,51 @@ export default function UserAuth({ onAuthSuccess }) {
         alert("Qeydiyyat uğurla tamamlandı! İndi daxil ola bilərsiniz.");
         setIsRegister(false);
       } else {
-        // Sign In User
+        // 1. Check BEFORE login if this email is registered as an Admin
+        const { data: adminCheck } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('email', email.trim().toLowerCase())
+          .maybeSingle();
+
+        if (adminCheck) {
+          // BLOCK IMMEDIATELY before creating any session
+          throw new Error("Təhlükəsizlik Xəbərdarlığı: Admin hesabları ilə adi istifadəçi girişindən daxil olmaq qadağandır!");
+        }
+
+        // 2. Proceed with user sign in
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password
         });
 
         if (error) throw error;
 
+        // 3. Double-check via RPC as secondary safety lock
         if (data.session) {
-          // Check if this email/user belongs to the admins table
           const { data: isAdmin } = await supabase.rpc('is_admin');
-
           if (isAdmin) {
-            // Sign out immediately and block login from general user form
             await supabase.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
             throw new Error("Təhlükəsizlik Xəbərdarlığı: Admin hesabları ilə adi istifadəçi girişindən daxil olmaq qadağandır!");
+          }
+
+          // Sync localStorage wishlist to Supabase DB upon login
+          try {
+            const guestWishlist = JSON.parse(localStorage.getItem('guest_wishlist') || '[]');
+            if (guestWishlist.length > 0) {
+              const wishlistPayload = guestWishlist.map(prod => ({
+                user_id: data.session.user.id,
+                product_id: prod.id,
+                product_data: prod
+              }));
+
+              await supabase.from('wishlist').upsert(wishlistPayload, { onConflict: 'user_id,product_id' });
+              localStorage.removeItem('guest_wishlist');
+            }
+          } catch (e) {
+            console.error("Wishlist sync error:", e);
           }
 
           if (onAuthSuccess) {

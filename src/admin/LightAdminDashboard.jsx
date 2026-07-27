@@ -26,10 +26,13 @@ const CATEGORY_NAMES = {
 const PIE_COLORS = ['#2563eb', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
 
 export default function LightAdminDashboard({ session, onLogout }) {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'orders', 'products', 'users'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'orders', 'products', 'users', 'messages'
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [messageFilter, setMessageFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [selectedMessage, setSelectedMessage] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Modal for view receipt image
@@ -53,10 +56,31 @@ export default function LightAdminDashboard({ session, onLogout }) {
       // Fetch Users
       const { data: userData } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
       setUsersList(userData || []);
+
+      // Fetch Contact Messages
+      const { data: msgData } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+      setMessages(msgData || []);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleMessageRead = async (msgId, currentStatus) => {
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .update({ is_read: !currentStatus })
+        .eq('id', msgId);
+
+      if (error) throw error;
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, is_read: !currentStatus } : m));
+      if (selectedMessage && selectedMessage.id === msgId) {
+        setSelectedMessage(prev => ({ ...prev, is_read: !currentStatus }));
+      }
+    } catch (err) {
+      alert("Xəta: " + err.message);
     }
   };
 
@@ -126,7 +150,15 @@ export default function LightAdminDashboard({ session, onLogout }) {
 
   // Statistics Calculations
   const pendingOrdersCount = orders.filter(o => o.status === 'pending').length;
+  const unreadMessagesCount = messages.filter(m => !m.is_read).length;
   const totalRevenue = orders.filter(o => o.status === 'approved').reduce((sum, o) => sum + (o.total_price || 0), 0);
+
+  // Filtered Messages
+  const filteredMessages = messages.filter(m => {
+    if (messageFilter === 'unread') return !m.is_read;
+    if (messageFilter === 'read') return m.is_read;
+    return true;
+  });
 
   // Prepare Last 7 Days Orders Chart Data
   const getLast7DaysData = () => {
@@ -210,6 +242,15 @@ export default function LightAdminDashboard({ session, onLogout }) {
           >
             <Users size={18} />
             <span>İstifadəçilər ({usersList.length})</span>
+          </button>
+
+          <button 
+            className={`sidebar-link ${activeTab === 'messages' ? 'active' : ''}`}
+            onClick={() => setActiveTab('messages')}
+          >
+            <FileText size={18} />
+            <span>Mesajlar</span>
+            {unreadMessagesCount > 0 && <span className="badge-count" style={{ background: '#ef4444' }}>{unreadMessagesCount}</span>}
           </button>
         </nav>
 
@@ -526,36 +567,113 @@ export default function LightAdminDashboard({ session, onLogout }) {
           </div>
         )}
 
-        {/* TAB 3: USERS SECTION */}
-        {activeTab === 'users' && (
+        {/* TAB 4: MESSAGES SECTION */}
+        {activeTab === 'messages' && (
           <div className="table-card">
-            <div className="table-card-header">
-              <h3>Qeydiyyatlı İstifadəçilər ({usersList.length})</h3>
+            <div className="table-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>Bizimlə Əlaqə Mesajları ({filteredMessages.length})</h3>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  className={`cat-tab ${messageFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setMessageFilter('all')}
+                  style={{ padding: '4px 12px', fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Bütün Mesajlar
+                </button>
+                <button 
+                  className={`cat-tab ${messageFilter === 'unread' ? 'active' : ''}`}
+                  onClick={() => setMessageFilter('unread')}
+                  style={{ padding: '4px 12px', fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Oxunmamış ({unreadMessagesCount})
+                </button>
+                <button 
+                  className={`cat-tab ${messageFilter === 'read' ? 'active' : ''}`}
+                  onClick={() => setMessageFilter('read')}
+                  style={{ padding: '4px 12px', fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Oxunmuş
+                </button>
+              </div>
             </div>
 
-            <table className="light-table">
-              <thead>
-                <tr>
-                  <th>Ad & Soyad</th>
-                  <th>Email</th>
-                  <th>Qeydiyyat Tarixi</th>
-                  <th>Sifariş Sayı</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usersList.map(u => {
-                  const userOrdersCount = orders.filter(o => o.user_id === u.id).length;
-                  return (
-                    <tr key={u.id}>
-                      <td><strong>{u.full_name || 'İstifadəçi'}</strong></td>
-                      <td>{u.email}</td>
-                      <td>{new Date(u.created_at).toLocaleDateString('az-AZ')}</td>
-                      <td><span className="order-count-chip">{userOrdersCount} Sifariş</span></td>
+            {loading ? (
+              <p className="light-loading">Yüklənir...</p>
+            ) : filteredMessages.length === 0 ? (
+              <p className="light-empty">Heç bir mesaj tapılmadı.</p>
+            ) : (
+              <table className="light-table">
+                <thead>
+                  <tr>
+                    <th>Göndərən</th>
+                    <th>Email</th>
+                    <th>Mövzu</th>
+                    <th>Tarix</th>
+                    <th>Status</th>
+                    <th>Əməliyyat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMessages.map(msg => (
+                    <tr key={msg.id} style={{ background: msg.is_read ? 'transparent' : 'rgba(59, 130, 246, 0.04)' }}>
+                      <td><strong>{msg.name}</strong></td>
+                      <td>{msg.email}</td>
+                      <td>{msg.subject || 'Mövzusuz'}</td>
+                      <td>{new Date(msg.created_at).toLocaleDateString('az-AZ')}</td>
+                      <td>
+                        <span className={`status-pill ${msg.is_read ? 'approved' : 'warning'}`}>
+                          {msg.is_read ? 'Oxunub' : 'Yeni / Oxunmayıb'}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="status-action-btns">
+                          <button 
+                            className="btn-approve" 
+                            title="Detala bax"
+                            onClick={() => {
+                              setSelectedMessage(msg);
+                              if (!msg.is_read) handleToggleMessageRead(msg.id, false);
+                            }}
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button 
+                            className="btn-reject" 
+                            title={msg.is_read ? "Oxunmamış et" : "Oxunmuş et"}
+                            onClick={() => handleToggleMessageRead(msg.id, msg.is_read)}
+                          >
+                            {msg.is_read ? '✉️' : '✓'}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {/* Modal for Viewing Full Contact Message Detail */}
+        {selectedMessage && (
+          <div className="modal-overlay" onClick={() => setSelectedMessage(null)}>
+            <div className="receipt-modal-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '540px' }}>
+              <div className="receipt-modal-header">
+                <h4>Əlaqə Mesajı Detalı</h4>
+                <button onClick={() => setSelectedMessage(null)}>&times;</button>
+              </div>
+              <div style={{ padding: '1.25rem' }}>
+                <p style={{ marginBottom: '8px' }}><strong>Göndərən:</strong> {selectedMessage.name} ({selectedMessage.email})</p>
+                <p style={{ marginBottom: '8px' }}><strong>Mövzu:</strong> {selectedMessage.subject || 'Mövzusuz'}</p>
+                <p style={{ marginBottom: '1rem', color: '#64748b', fontSize: '0.85rem' }}>
+                  <strong>Tarix:</strong> {new Date(selectedMessage.created_at).toLocaleString('az-AZ')}
+                </p>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '10px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                  {selectedMessage.message}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>

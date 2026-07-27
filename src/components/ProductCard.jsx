@@ -2,7 +2,7 @@ import React from 'react';
 import { Cpu, Monitor, HardDrive, Zap, Box, Thermometer, Database, MemoryStick, Check } from 'lucide-react';
 import './ProductCard.css';
 
-export default function ProductCard({ product, category, onSelect, isSelected }) {
+export default function ProductCard({ product, category, onSelect, isSelected, onAddToCart }) {
   const getCategoryBadge = () => {
     switch (category) {
       case 'cpu': return { label: 'Processor', icon: <Cpu size={14} /> };
@@ -52,22 +52,38 @@ export default function ProductCard({ product, category, onSelect, isSelected })
             <span className="price-currency">AZN</span>
           </div>
 
-          <button 
-            className={`select-btn ${isSelected ? 'selected' : ''}`} 
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onSelect) onSelect(product);
-            }}
-          >
-            {isSelected ? (
-              <>
-                <Check size={16} />
-                <span>Seçildi</span>
-              </>
-            ) : (
-              <span>Seç</span>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button 
+              className={`select-btn ${isSelected ? 'selected' : ''}`} 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onSelect) onSelect(product);
+              }}
+            >
+              {isSelected ? (
+                <>
+                  <Check size={16} />
+                  <span>Seçildi</span>
+                </>
+              ) : (
+                <span>Seç</span>
+              )}
+            </button>
+
+            {onAddToCart && (
+              <button 
+                className="select-btn"
+                style={{ background: 'rgba(139, 92, 246, 0.15)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCart(product);
+                }}
+                title="Səbətə Əlavə Et"
+              >
+                🛒
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </div>
