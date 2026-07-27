@@ -79,13 +79,16 @@ function App() {
 
   const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
 
-  // Fetch counts for Header badges
+  // Fetch counts for Header badges (Cart count = number of DISTINCT product types/rows)
   const fetchHeaderCounts = async (currSession) => {
     if (currSession?.user?.id) {
-      // Cart count
-      const { data: cartData } = await supabase.from('cart_items').select('quantity').eq('user_id', currSession.user.id);
-      const totalCartQty = (cartData || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
-      setCartCount(totalCartQty);
+      // Cart distinct items count (number of unique rows)
+      const { count: cartDistinctCount } = await supabase
+        .from('cart_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', currSession.user.id);
+      
+      setCartCount(cartDistinctCount || 0);
 
       // Wishlist count
       const { count: wishCount } = await supabase.from('wishlist').select('*', { count: 'exact', head: true }).eq('user_id', currSession.user.id);
@@ -123,6 +126,7 @@ function App() {
           setIsAdminSession(!!isAdmin);
           setSession(targetSession);
           fetchHeaderCounts(targetSession);
+          fetchWishlistIds(targetSession);
         }
       } catch (e) {
         if (mounted) {
@@ -159,7 +163,7 @@ function App() {
     };
   }, []);
 
-  // Add single product or PC build to cart
+  // Add single product or PC build to cart (increment quantity if already exists)
   const handleAddToCart = async (item, itemType = 'single_part') => {
     if (!session) {
       setActiveTab('auth');
@@ -167,31 +171,103 @@ function App() {
     }
 
     try {
-      const payload = {
-        user_id: session.user.id,
-        item_type: itemType,
-        item_data: item,
-        price: item.price || Object.values(item.parts || {}).reduce((s, p) => s + (p ? p.price : 0), 0),
-        quantity: 1
-      };
+      const userId = session.user.id;
+      const targetId = item.id || JSON.stringify(item.parts || {});
 
-      const { error } = await supabase.from('cart_items').insert([payload]);
-      if (error) throw error;
+      // 1. Fetch user's current cart items to check if item already exists
+      const { data: existingItems, error: fetchErr } = await supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('item_type', itemType);
 
-      alert("Məhsul səbətə əlavə olundu!");
+      if (fetchErr) throw fetchErr;
+
+      // Find matching item
+      const match = (existingItems || []).find(cartItem => {
+        if (itemType === 'single_part') {
+          return cartItem.item_data?.id === targetId;
+        } else {
+          return JSON.stringify(cartItem.item_data?.parts || {}) === JSON.stringify(item.parts || {});
+        }
+      });
+
+      if (match) {
+        // UPDATE: Increment quantity
+        const { error: updateErr } = await supabase
+          .from('cart_items')
+          .update({ quantity: (match.quantity || 1) + 1 })
+          .eq('id', match.id);
+
+        if (updateErr) throw updateErr;
+      } else {
+        // INSERT: Create new row with quantity = 1
+        const payload = {
+          user_id: userId,
+          item_type: itemType,
+          item_data: item,
+          price: item.price || Object.values(item.parts || {}).reduce((s, p) => s + (p ? p.price : 0), 0),
+          quantity: 1
+        };
+
+        const { error: insertErr } = await supabase.from('cart_items').insert([payload]);
+        if (insertErr) throw insertErr;
+      }
+
       fetchHeaderCounts(session);
     } catch (err) {
+      console.error("Cart error:", err);
       alert("Səbətə əlavə etmə xətası: " + err.message);
     }
   };
 
-  const handleSelectPartFromCatalog = (product) => {
-    if (!product || !product.category) return;
-    setSelectedParts(prev => ({
-      ...prev,
-      [product.category]: product
-    }));
-    setActiveTab('builder');
+  const [wishlistIds, setWishlistIds] = useState([]);
+
+  // Fetch wishlist IDs for visual heart toggle state
+  const fetchWishlistIds = async (currSession) => {
+    if (currSession?.user?.id) {
+      const { data } = await supabase.from('wishlist').select('product_id').eq('user_id', currSession.user.id);
+      setWishlistIds((data || []).map(i => i.product_id));
+    } else {
+      try {
+        const guestWish = JSON.parse(localStorage.getItem('guest_wishlist') || '[]');
+        setWishlistIds(guestWish.map(i => i.id));
+      } catch (e) {
+        setWishlistIds([]);
+      }
+    }
+  };
+
+  // Toggle wishlist (add/remove) for any product card
+  const handleToggleWishlist = async (product) => {
+    if (!product || !product.id) return;
+    const productId = product.id;
+    const exists = wishlistIds.includes(productId);
+
+    if (session?.user?.id) {
+      if (exists) {
+        await supabase.from('wishlist').delete().eq('user_id', session.user.id).eq('product_id', productId);
+        setWishlistIds(prev => prev.filter(id => id !== productId));
+      } else {
+        await supabase.from('wishlist').insert([{ user_id: session.user.id, product_id: productId, product_data: product }]);
+        setWishlistIds(prev => [...prev, productId]);
+      }
+    } else {
+      let guestWish = [];
+      try {
+        guestWish = JSON.parse(localStorage.getItem('guest_wishlist') || '[]');
+      } catch (e) {}
+
+      if (exists) {
+        guestWish = guestWish.filter(p => p.id !== productId);
+        setWishlistIds(prev => prev.filter(id => id !== productId));
+      } else {
+        guestWish.push(product);
+        setWishlistIds(prev => [...prev, productId]);
+      }
+      localStorage.setItem('guest_wishlist', JSON.stringify(guestWish));
+    }
+    fetchHeaderCounts(session);
   };
 
   const handleLogout = async () => {
@@ -260,6 +336,8 @@ function App() {
             selectedParts={selectedParts}
             onSelectPart={handleSelectPartFromCatalog}
             onAddToCart={(prod) => handleAddToCart(prod, 'single_part')}
+            wishlistIds={wishlistIds}
+            onToggleWishlist={handleToggleWishlist}
           />
         )}
 
@@ -294,6 +372,7 @@ function App() {
             session={session} 
             onAddToCart={(prod) => handleAddToCart(prod, 'single_part')}
             onNavigateToCatalog={() => setActiveTab('home')}
+            onToggleWishlist={handleToggleWishlist}
           />
         )}
 

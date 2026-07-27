@@ -91,10 +91,12 @@ export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog
                 product={product}
                 category={product.category}
                 onAddToCart={onAddToCart}
+                onToggleWishlist={onToggleWishlist || handleRemoveFromWishlist}
+                isInWishlist={true}
               />
               <button 
                 className="wishlist-remove-btn" 
-                onClick={() => handleRemoveFromWishlist(product.id)}
+                onClick={() => (onToggleWishlist ? onToggleWishlist(product) : handleRemoveFromWishlist(product.id))}
                 title="İstək siyahısından sil"
               >
                 <Trash2 size={16} />

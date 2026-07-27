@@ -18,7 +18,14 @@ const CATEGORIES = [
 
 const PAGE_SIZE = 15;
 
-export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSelectPart }) {
+export default function Catalog({ 
+  onNavigateToBuilder, 
+  selectedParts = {}, 
+  onSelectPart,
+  onAddToCart,
+  wishlistIds = [],
+  onToggleWishlist
+}) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -217,6 +224,8 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
           <div className="product-grid">
             {filteredProducts.map(product => {
               const isSelected = selectedParts[product.category]?.id === product.id;
+              const isInWishlist = wishlistIds.includes(product.id);
+
               return (
                 <ProductCard 
                   key={product.id} 
@@ -224,6 +233,9 @@ export default function Catalog({ onNavigateToBuilder, selectedParts = {}, onSel
                   category={product.category}
                   isSelected={isSelected}
                   onSelect={onSelectPart}
+                  onAddToCart={onAddToCart}
+                  onToggleWishlist={onToggleWishlist}
+                  isInWishlist={isInWishlist}
                 />
               );
             })}

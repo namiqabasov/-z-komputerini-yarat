@@ -1,8 +1,24 @@
-import React from 'react';
-import { Cpu, Monitor, HardDrive, Zap, Box, Thermometer, Database, MemoryStick, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Cpu, Monitor, HardDrive, Zap, Box, Thermometer, Database, MemoryStick, Check, ShoppingCart, Heart } from 'lucide-react';
 import './ProductCard.css';
 
-export default function ProductCard({ product, category, onSelect, isSelected, onAddToCart }) {
+export default function ProductCard({ 
+  product, 
+  category, 
+  onSelect, 
+  isSelected, 
+  onAddToCart,
+  onToggleWishlist,
+  isInCart = false,
+  isInWishlist = false
+}) {
+  const [toastMsg, setToastMsg] = useState(null);
+
+  const triggerToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2200);
+  };
+
   const getCategoryBadge = () => {
     switch (category) {
       case 'cpu': return { label: 'Processor', icon: <Cpu size={14} /> };
@@ -25,6 +41,46 @@ export default function ProductCard({ product, category, onSelect, isSelected, o
       onClick={() => onSelect && onSelect(product)}
       style={{ cursor: onSelect ? 'pointer' : 'default' }}
     >
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="card-toast-alert">
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
+      {/* Hover Action Overlay Icons (Cart & Wishlist) */}
+      <div className="card-hover-actions">
+        {/* Wishlist Toggle Button */}
+        <button 
+          className={`hover-action-btn wishlist ${isInWishlist ? 'active' : ''}`}
+          title={isInWishlist ? "İstək siyahısından çıxar" : "İstək siyahısına əlavə et"}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onToggleWishlist) {
+              onToggleWishlist(product);
+              triggerToast(isInWishlist ? "İstək siyahısından silindi" : "İstək siyahısına əlavə olundu");
+            }
+          }}
+        >
+          <Heart size={16} fill={isInWishlist ? "#ec4899" : "none"} stroke={isInWishlist ? "#ec4899" : "currentColor"} />
+        </button>
+
+        {/* Cart Quick Add Button */}
+        {onAddToCart && (
+          <button 
+            className={`hover-action-btn cart ${isInCart ? 'active' : ''}`}
+            title={isInCart ? "Səbətdə var (sayı artırın)" : "Səbətə əlavə et"}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart(product);
+              triggerToast("Məhsul səbətə əlavə olundu 🛒");
+            }}
+          >
+            <ShoppingCart size={16} fill={isInCart ? "var(--accent-cyan)" : "none"} stroke={isInCart ? "#000" : "currentColor"} />
+          </button>
+        )}
+      </div>
+
       <div className="card-image-container">
         <img src={product.image} alt={product.name} loading="lazy" />
         <span className="brand-tag">{product.brand}</span>
@@ -69,20 +125,6 @@ export default function ProductCard({ product, category, onSelect, isSelected, o
                 <span>Seç</span>
               )}
             </button>
-
-            {onAddToCart && (
-              <button 
-                className="select-btn"
-                style={{ background: 'rgba(139, 92, 246, 0.15)', borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart(product);
-                }}
-                title="Səbətə Əlavə Et"
-              >
-                🛒
-              </button>
-            )}
           </div>
         </div>
       </div>
