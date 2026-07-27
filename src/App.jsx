@@ -13,6 +13,23 @@ import SecretAdminLogin from './admin/SecretAdminLogin';
 import LightAdminDashboard from './admin/LightAdminDashboard';
 import { supabase } from './supabaseClient';
 
+// Explicit CSS Imports to guarantee styling bundler inclusion during production Vercel builds
+import './components/Header.css';
+import './components/Footer.css';
+import './components/Catalog.css';
+import './components/PcBuilder.css';
+import './components/ProductCard.css';
+import './components/VisualPC.css';
+import './components/ContactPage.css';
+import './user/CartPage.css';
+import './user/WishlistPage.css';
+import './user/UserAuth.css';
+import './user/UserProfile.css';
+import './user/PaymentModal.css';
+import './admin/SecretAdminLogin.css';
+import './admin/LightAdminDashboard.css';
+import './admin/ProductModal.css';
+
 function App() {
   const [activeTab, setActiveTab] = useState('home'); // 'home', 'builder', 'cart', 'wishlist', 'contact', 'profile', 'auth', 'admin-secret'
   const [session, setSession] = useState(null);
