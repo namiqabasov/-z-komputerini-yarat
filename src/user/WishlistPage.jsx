@@ -4,7 +4,7 @@ import { Heart, ShoppingBag, Trash2, Box, AlertCircle } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import './WishlistPage.css';
 
-export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog }) {
+export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog, onToggleWishlist }) {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
