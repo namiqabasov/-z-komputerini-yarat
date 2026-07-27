@@ -126,7 +126,9 @@ function App() {
           setIsAdminSession(!!isAdmin);
           setSession(targetSession);
           fetchHeaderCounts(targetSession);
-          fetchWishlistIds(targetSession);
+          try {
+            fetchWishlistIds(targetSession);
+          } catch (e) {}
         }
       } catch (e) {
         if (mounted) {
