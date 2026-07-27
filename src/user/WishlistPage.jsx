@@ -85,8 +85,8 @@ export default function WishlistPage({ session, onAddToCart, onNavigateToCatalog
         </div>
       ) : (
         <div className="wishlist-grid">
-          {wishlistItems.map(product => (
-            <div key={product.id} className="wishlist-card-wrapper">
+          {wishlistItems.filter(Boolean).map(product => (
+            <div key={product.id || Math.random()} className="wishlist-card-wrapper">
               <ProductCard
                 product={product}
                 category={product.category}
