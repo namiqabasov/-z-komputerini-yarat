@@ -190,47 +190,93 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.chat-guest-name-input {
-  border: 1px solid #cbd5e1;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chat-input-row {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.chat-input-row input {
+.chat-input-row input[type="text"] {
   flex: 1;
+  min-width: 0; /* Prevents text input from overflowing flex box */
   border: 1px solid #cbd5e1;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   outline: none;
+  box-sizing: border-box;
 }
 
-.chat-input-row input:focus {
+.chat-input-row input[type="text"]:focus {
   border-color: #2563eb;
 }
 
+.chat-attach-btn {
+  flex-shrink: 0; /* Ensures photo and mic icons never shrink or disappear */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .chat-send-btn {
+  flex-shrink: 0; /* Ensures send button NEVER shrinks or disappears on small screens */
   background: #2563eb;
   color: #fff;
   border: none;
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  min-width: 38px;
+  height: 38px;
 }
 
 .chat-send-btn:hover {
   background: #1d4ed8;
+}
+
+.chat-send-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsiveness for Live Chat Widget */
+@media (max-width: 480px) {
+  .live-chat-widget {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .chat-window-box {
+    width: calc(100vw - 20px) !important;
+    height: calc(100vh - 80px) !important;
+    max-height: 520px;
+    bottom: 0;
+    right: 0;
+    border-radius: 12px;
+  }
+
+  .chat-input-row {
+    gap: 4px;
+  }
+
+  .chat-input-row input[type="text"] {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+
+  .chat-send-btn {
+    padding: 6px 10px;
+    min-width: 34px;
+    height: 34px;
+  }
 }
