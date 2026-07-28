@@ -276,10 +276,18 @@ export default function LightAdminDashboard({ session, onLogout }) {
             <p className="sub-text">Admin: {session?.user?.email}</p>
           </div>
 
-          <div className="stats-pills">
+          <div className="stats-pills" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button className="refresh-btn" onClick={fetchAllData}>
               <RefreshCw size={14} />
               <span>Məlumatları Yenilə</span>
+            </button>
+            <button 
+              className="refresh-btn" 
+              onClick={onLogout}
+              style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626', fontWeight: '700' }}
+            >
+              <LogOut size={14} />
+              <span>Admin Çıxış</span>
             </button>
           </div>
         </header>
