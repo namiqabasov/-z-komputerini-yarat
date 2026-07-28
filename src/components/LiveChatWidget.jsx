@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { MessageSquare, X, Send, User, Headset, Circle, Image as ImageIcon } from 'lucide-react';
+import { MessageSquare, X, Send, User, Headset, Circle, Image as ImageIcon, Mic, Square } from 'lucide-react';
 import './LiveChatWidget.css';
 
 export default function LiveChatWidget({ session, onRequireLogin }) {
@@ -11,8 +11,14 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingTimerRef = useRef(null);
 
   // If user is not logged in, clicking chat triggers login redirect
   const handleOpenChat = () => {
@@ -162,14 +168,11 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `chat/${fileName}`;
 
-      // Upload image to receipts bucket or public storage bucket
       const { error: uploadErr } = await supabase.storage.from('receipts').upload(filePath, file);
       if (uploadErr) throw uploadErr;
 
       const { data: publicUrlObj } = supabase.storage.from('receipts').getPublicUrl(filePath);
       const imageUrl = publicUrlObj.publicUrl;
-
-      // Insert message containing image tag [IMAGE]:url
       const imageMsgContent = `[IMAGE]:${imageUrl}`;
 
       const { data: insertedMsg } = await supabase
@@ -191,6 +194,113 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
       }
     } catch (err) {
       alert("Şəkil yüklənmə xətası: " + err.message);
+    } finally {
+      setUploadingImg(false);
+    }
+  };
+
+  // Start User Voice Recording (WhatsApp style)
+  const startUserVoiceRecording = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Sizin brauzeriniz mikrofon yazmağı dəstəkləmir.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await sendUserVoiceMessage(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } catch (err) {
+      alert("Mikrofon icazəsi xətası: Zəhmət olmasa brauzerdə mikrofona icazə verin. (Error: " + err.message + ")");
+    }
+  };
+
+  // Stop User Voice Recording & Send
+  const stopUserVoiceRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      clearInterval(recordingTimerRef.current);
+    }
+  };
+
+  // Send User Voice Message Blob
+  const sendUserVoiceMessage = async (audioBlob) => {
+    setUploadingImg(true);
+    try {
+      let currentConv = conversation;
+
+      if (!currentConv) {
+        const payload = {
+          guest_identifier: session?.user?.id || 'auth_user',
+          guest_name: session?.user?.user_metadata?.full_name || session?.user?.email || 'İstifadəçi',
+          user_id: session?.user?.id,
+          status: 'active'
+        };
+
+        const { data: newConv, error: convErr } = await supabase
+          .from('chat_conversations')
+          .insert(payload)
+          .select()
+          .single();
+
+        if (convErr) throw convErr;
+        currentConv = newConv;
+        setConversation(newConv);
+      }
+
+      const fileName = `user_voice_${Date.now()}_${Math.random().toString(36).substring(2)}.webm`;
+      const filePath = `chat/${fileName}`;
+
+      const { error: uploadErr } = await supabase.storage.from('receipts').upload(filePath, audioBlob, {
+        contentType: 'audio/webm'
+      });
+
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlObj } = supabase.storage.from('receipts').getPublicUrl(filePath);
+      const audioUrl = publicUrlObj.publicUrl;
+      const audioMsgContent = `[AUDIO]:${audioUrl}`;
+
+      const { data: insertedMsg, error: msgErr } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: currentConv.id,
+          sender: 'user',
+          message: audioMsgContent
+        })
+        .select()
+        .single();
+
+      if (!msgErr && insertedMsg) {
+        setMessages((prev) => [...prev, insertedMsg]);
+        await supabase
+          .from('chat_conversations')
+          .update({ last_message_at: new Date().toISOString() })
+          .eq('id', currentConv.id);
+      }
+    } catch (err) {
+      alert("Səs göndərmə xətası: " + err.message);
     } finally {
       setUploadingImg(false);
     }
@@ -338,20 +448,43 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
                   type="button" 
                   className="chat-attach-btn" 
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImg}
+                  disabled={uploadingImg || isRecording}
                   title="Şəkil Yüklə"
                   style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', padding: '8px 10px', cursor: 'pointer' }}
                 >
                   <ImageIcon size={18} />
                 </button>
+
+                {isRecording ? (
+                  <button
+                    type="button"
+                    onClick={stopUserVoiceRecording}
+                    style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: '8px', padding: '6px 12px', fontSize: '0.82rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                  >
+                    <Square size={14} fill="#dc2626" />
+                    <span>Göndər ({recordingTime}s)</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="chat-attach-btn"
+                    onClick={startUserVoiceRecording}
+                    disabled={uploadingImg}
+                    title="Səsli Mesaj Yaz"
+                    style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', borderRadius: '8px', padding: '8px 10px', cursor: 'pointer' }}
+                  >
+                    <Mic size={18} />
+                  </button>
+                )}
+
                 <input
                   type="text"
-                  placeholder={uploadingImg ? "Şəkil yüklənir..." : "Mesajınızı yazın..."}
+                  placeholder={uploadingImg ? "Şəkil yüklənir..." : isRecording ? "Səs yazılır..." : "Mesajınızı yazın..."}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  disabled={uploadingImg}
+                  disabled={uploadingImg || isRecording}
                 />
-                <button type="submit" className="chat-send-btn" disabled={loading || uploadingImg}>
+                <button type="submit" className="chat-send-btn" disabled={loading || uploadingImg || isRecording || !inputText.trim()}>
                   <Send size={18} />
                 </button>
               </div>
