@@ -117,15 +117,56 @@ export default function LightAdminDashboard({ session, onLogout }) {
     fetchAllData();
   }, []);
 
-  // Update order status
+  // Update order status & trigger automatic email dispatch when approved
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
+      const targetOrder = orders.find(o => o.id === orderId);
+
       const { error } = await supabase
         .from('orders')
         .update({ status: newStatus })
         .eq('id', orderId);
 
       if (error) throw error;
+
+      // If status changed to 'approved', trigger automatic Resend Email
+      if (newStatus === 'approved' && targetOrder) {
+        try {
+          const emailRes = await fetch('/api/send-order-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: targetOrder.id,
+              userEmail: targetOrder.user_email,
+              userName: targetOrder.user_name,
+              items: targetOrder.items,
+              totalPrice: targetOrder.total_price,
+              paymentMethod: targetOrder.payment_method,
+              orderDate: new Date(targetOrder.created_at).toLocaleDateString('az-AZ')
+            })
+          });
+
+          const emailData = await emailRes.json();
+
+          if (emailRes.ok && emailData.success) {
+            await supabase
+              .from('orders')
+              .update({
+                email_sent: true,
+                email_sent_at: new Date().toISOString()
+              })
+              .eq('id', orderId);
+            
+            alert(`✅ Sifariş təsdiqləndi və ${targetOrder.user_email} ünvanına avtomatik qəbz göndərildi!`);
+          } else {
+            console.error("Email dispatch failed:", emailData);
+            alert(`⚠️ Sifariş təsdiqləndi, lakin e-poçt göndərilərkən xəta oldu: ${emailData.error || 'API Key / Servis xətası'}`);
+          }
+        } catch (e) {
+          console.error("Email API trigger error:", e);
+        }
+      }
+
       fetchAllData();
     } catch (err) {
       alert("Status yenilənmə xətası: " + err.message);
@@ -552,11 +593,22 @@ export default function LightAdminDashboard({ session, onLogout }) {
                         )}
                       </td>
                       <td>
-                        <span className={`status-pill ${order.status}`}>
-                          {order.status === 'approved' && 'Təsdiqləndi'}
-                          {order.status === 'rejected' && 'Rədd Edildi'}
-                          {order.status === 'pending' && 'Gözləmədə'}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span className={`status-pill ${order.status}`}>
+                            {order.status === 'approved' && 'Təsdiqləndi'}
+                            {order.status === 'rejected' && 'Rədd Edildi'}
+                            {order.status === 'pending' && 'Gözləmədə'}
+                          </span>
+                          {order.email_sent ? (
+                            <span style={{ fontSize: '0.72rem', color: '#166534', background: '#dcfce7', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                              ✉️ Email Göndərildi
+                            </span>
+                          ) : order.status === 'approved' ? (
+                            <span style={{ fontSize: '0.72rem', color: '#991b1b', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                              ⚠️ Email Göndərilməyib
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td>
                         <div className="status-action-btns">
