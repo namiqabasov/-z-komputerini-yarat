@@ -96,12 +96,25 @@ ON public.contact_messages FOR SELECT
 TO authenticated
 USING (public.is_admin());
 
-CREATE POLICY "Admins can update contact messages"
-ON public.contact_messages FOR UPDATE
-TO authenticated
-USING (public.is_admin());
-
-CREATE POLICY "Admins can delete contact messages"
-ON public.contact_messages FOR DELETE
-TO authenticated
-USING (public.is_admin());
+-- ===================================================
+-- 4. RPC FUNCTION TO DELETE USER ACCOUNT FROM AUTH.USERS
+-- ===================================================
+CREATE OR REPLACE FUNCTION public.delete_user_account(target_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    -- Security check: Allow if admin OR if deleting own account
+    IF public.is_admin() OR auth.uid() = target_user_id THEN
+        -- Delete user data cascades
+        DELETE FROM public.cart_items WHERE user_id = target_user_id;
+        DELETE FROM public.wishlist WHERE user_id = target_user_id;
+        DELETE FROM public.profiles WHERE id = target_user_id;
+        DELETE FROM auth.users WHERE id = target_user_id;
+        RETURN TRUE;
+    ELSE
+        RAISE EXCEPTION 'İcazə verilmədi: Yalnız admin və ya hesab sahibi hesabı silə bilər!';
+    END IF;
+END;
+$$;

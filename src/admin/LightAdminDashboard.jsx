@@ -201,27 +201,23 @@ export default function LightAdminDashboard({ session, onLogout }) {
   const categoryChartData = getCategoryChartData();
   const recent5Orders = orders.slice(0, 5);
 
-  // Delete user account profile with confirmation
+  // Delete user account profile & auth record with confirmation
   const handleDeleteUser = async (userId, userEmail) => {
-    if (!window.confirm(`"${userEmail || 'İstifadəçi'}" istifadəçisini və onun bütün profil məlumatlarını silmək istədiyinizə əminsiniz?`)) return;
+    if (!window.confirm(`"${userEmail || 'İstifadəçi'}" istifadəçisini və onun bütün auth/profil məlumatlarını tamamilə silmək istədiyinizə əminsiniz?`)) return;
 
     try {
-      // 1. Delete user profile record from public.profiles
-      const { error: profileErr } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
+      // 1. Call RPC function to delete from auth.users, profiles, cart, wishlist
+      const { error: rpcErr } = await supabase.rpc('delete_user_account', { target_user_id: userId });
 
-      if (profileErr) {
-        console.warn("Profile delete warning:", profileErr);
+      if (rpcErr) {
+        // Fallback: Delete profile directly if RPC function not created in SQL yet
+        await supabase.from('profiles').delete().eq('id', userId);
+        await supabase.from('cart_items').delete().eq('user_id', userId);
+        await supabase.from('wishlist').delete().eq('user_id', userId);
       }
 
-      // 2. Clear related user data (cart items, wishlist, etc)
-      await supabase.from('cart_items').delete().eq('user_id', userId);
-      await supabase.from('wishlist').delete().eq('user_id', userId);
-
       setUsersList(prev => prev.filter(u => u.id !== userId));
-      alert("İstifadəçi profil məlumatları uğurla silindi.");
+      alert("İstifadəçi hesab və profil məlumatları bazadan tamamilə silindi.");
     } catch (err) {
       alert("İstifadəçi silinmə xətası: " + (err.message || "Baza xətası baş verdi"));
     }

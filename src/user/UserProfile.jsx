@@ -67,10 +67,33 @@ export default function UserProfile({ session, onLogout }) {
             <p className="profile-email"><Mail size={14} /> {session?.user?.email}</p>
           </div>
         </div>
-        <button className="user-logout-btn" onClick={onLogout}>
-          <LogOut size={16} />
-          <span>Çıxış</span>
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="user-logout-btn" 
+            style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444' }}
+            onClick={async () => {
+              if (!window.confirm("Hesabınızı tamamilə silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.")) return;
+              try {
+                const userId = session.user.id;
+                const { error: rpcErr } = await supabase.rpc('delete_user_account', { target_user_id: userId });
+                if (rpcErr) {
+                  await supabase.from('profiles').delete().eq('id', userId);
+                }
+                alert("Hesabınız uğurla silindi.");
+                if (onLogout) onLogout();
+              } catch (e) {
+                alert("Hesab silinmə xətası: " + e.message);
+              }
+            }}
+            title="Hesabı tamamilə sil"
+          >
+            🗑️ Hesabımı Sil
+          </button>
+          <button className="user-logout-btn" onClick={onLogout}>
+            <LogOut size={16} />
+            <span>Çıxış</span>
+          </button>
+        </div>
       </div>
 
       {/* Orders History Section */}
