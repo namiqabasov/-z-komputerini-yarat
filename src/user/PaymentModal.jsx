@@ -154,20 +154,27 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
       }
 
       // BANK TRANSFER METHOD
-      const { error } = await supabase
-        .from('orders')
-        .insert([{
-          user_id: session.user.id,
-          user_email: session.user.email,
-          user_name: session.user.user_metadata?.full_name || 'Müştəri',
-          items: itemsList,
-          total_price: totalPrice,
-          payment_method: 'bank_transfer',
-          receipt_url: receiptUrl,
-          status: 'pending'
-        }]);
+      const orderPayload = {
+        user_id: session.user.id,
+        user_email: session.user.email,
+        user_name: session.user.user_metadata?.full_name || 'Müştəri',
+        items: itemsList,
+        total_price: totalPrice,
+        payment_method: 'bank_transfer',
+        receipt_url: receiptUrl,
+        status: 'pending'
+      };
 
-      if (error) throw error;
+      const { error: insertErr } = await supabase
+        .from('orders')
+        .insert([orderPayload]);
+
+      if (insertErr) {
+        // Fallback if payment_method column is missing in database schema
+        delete orderPayload.payment_method;
+        const { error: retryErr } = await supabase.from('orders').insert([orderPayload]);
+        if (retryErr) throw retryErr;
+      }
 
       // Empty user's cart
       if (cartItems && cartItems.length > 0) {
@@ -178,7 +185,8 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
-      setErrorMsg("Sifariş yaradılarkən xəta: " + err.message);
+      console.error("Order creation error:", err);
+      setErrorMsg("Sifariş yaradılarkən xəta: " + (err.message || JSON.stringify(err)));
     } finally {
       setSubmitting(false);
     }
