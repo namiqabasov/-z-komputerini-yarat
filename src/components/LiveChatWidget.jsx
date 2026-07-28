@@ -77,11 +77,12 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
     }
   };
 
-  // Supabase Realtime Subscription for incoming admin messages
+  // Supabase Realtime Subscription for incoming admin messages AND conversation status update
   useEffect(() => {
     if (!conversation?.id) return;
 
-    const channel = supabase
+    // 1. Listen for new messages
+    const msgChannel = supabase
       .channel(`chat_messages:${conversation.id}`)
       .on(
         'postgres_changes',
@@ -105,8 +106,28 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
       )
       .subscribe();
 
+    // 2. Listen for conversation status changes (e.g. closed by admin)
+    const convChannel = supabase
+      .channel(`chat_conv_status:${conversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_conversations',
+          filter: `id=eq.${conversation.id}`
+        },
+        (payload) => {
+          if (payload.new && payload.new.status) {
+            setConversation((prev) => ({ ...prev, status: payload.new.status }));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(msgChannel);
+      supabase.removeChannel(convChannel);
     };
   }, [conversation?.id, isOpen]);
 
@@ -295,37 +316,43 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
           </div>
 
           {/* Footer Form */}
-          <form className="chat-window-footer" onSubmit={handleSendMessage}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handleImageUpload} 
-            />
-            <div className="chat-input-row">
-              <button 
-                type="button" 
-                className="chat-attach-btn" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingImg}
-                title="Şəkil Yüklə"
-                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', padding: '8px 10px', cursor: 'pointer' }}
-              >
-                <ImageIcon size={18} />
-              </button>
-              <input
-                type="text"
-                placeholder={uploadingImg ? "Şəkil yüklənir..." : "Mesajınızı yazın..."}
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                disabled={uploadingImg}
-              />
-              <button type="submit" className="chat-send-btn" disabled={loading || uploadingImg}>
-                <Send size={18} />
-              </button>
+          {conversation?.status === 'closed' ? (
+            <div style={{ padding: '12px', textAlign: 'center', background: '#fef2f2', color: '#dc2626', borderTop: '1px solid #fee2e2', fontWeight: '600', fontSize: '0.85rem' }}>
+              🔒 Bu söhbət operator tərəfindən bağlandı. Artıq mesaj yazmaq mümkün deyil.
             </div>
-          </form>
+          ) : (
+            <form className="chat-window-footer" onSubmit={handleSendMessage}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleImageUpload} 
+              />
+              <div className="chat-input-row">
+                <button 
+                  type="button" 
+                  className="chat-attach-btn" 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImg}
+                  title="Şəkil Yüklə"
+                  style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', padding: '8px 10px', cursor: 'pointer' }}
+                >
+                  <ImageIcon size={18} />
+                </button>
+                <input
+                  type="text"
+                  placeholder={uploadingImg ? "Şəkil yüklənir..." : "Mesajınızı yazın..."}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  disabled={uploadingImg}
+                />
+                <button type="submit" className="chat-send-btn" disabled={loading || uploadingImg}>
+                  <Send size={18} />
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       )}
     </div>

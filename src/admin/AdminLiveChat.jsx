@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle } from 'lucide-react';
+import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle, Trash2 } from 'lucide-react';
 import './AdminLiveChat.css';
 
 export default function AdminLiveChat() {
@@ -172,6 +172,50 @@ export default function AdminLiveChat() {
     }
   };
 
+  // Delete Conversation Completely (Purge messages and images from storage)
+  const handleDeleteConversation = async (convId) => {
+    if (!window.confirm("Bu söhbəti və bütün mesajlarını (şəkillər daxil) verilənlər bazasından tamamilə silmək istədiyinizə əminsiniz? Yaddaş boşaldılacaq.")) return;
+
+    try {
+      // 1. Delete image files from Supabase storage if any
+      const { data: msgList } = await supabase
+        .from('chat_messages')
+        .select('message')
+        .eq('conversation_id', convId);
+
+      if (msgList && msgList.length > 0) {
+        const imagePaths = msgList
+          .filter(m => m.message.startsWith('[IMAGE]:'))
+          .map(m => {
+            const url = m.message.replace('[IMAGE]:', '');
+            const parts = url.split('/receipts/');
+            return parts.length > 1 ? parts[1] : null;
+          })
+          .filter(Boolean);
+
+        if (imagePaths.length > 0) {
+          await supabase.storage.from('receipts').remove(imagePaths);
+        }
+      }
+
+      // 2. Delete messages from database
+      await supabase.from('chat_messages').delete().eq('conversation_id', convId);
+
+      // 3. Delete conversation row from database
+      const { error: delErr } = await supabase.from('chat_conversations').delete().eq('id', convId);
+      if (delErr) throw delErr;
+
+      setConversations(prev => prev.filter(c => c.id !== convId));
+      if (selectedConv?.id === convId) {
+        setSelectedConv(null);
+        setMessages([]);
+      }
+      alert("Söhbət və bütün məlumatları tamamilə silindi.");
+    } catch (err) {
+      alert("Silinmə xətası: " + err.message);
+    }
+  };
+
   return (
     <div className="admin-chat-container">
       {/* Sidebar: Conversation List */}
@@ -226,16 +270,28 @@ export default function AdminLiveChat() {
                 </div>
               </div>
 
-              {selectedConv.status === 'active' && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {selectedConv.status === 'active' && (
+                  <button
+                    className="close-conv-btn"
+                    onClick={() => handleCloseConversation(selectedConv.id)}
+                    title="Söhbəti bağla"
+                  >
+                    <Archive size={16} />
+                    <span>Söhbəti Bağla</span>
+                  </button>
+                )}
+                
                 <button
                   className="close-conv-btn"
-                  onClick={() => handleCloseConversation(selectedConv.id)}
-                  title="Söhbəti bağla"
+                  onClick={() => handleDeleteConversation(selectedConv.id)}
+                  title="Söhbəti və məlumatları sil"
+                  style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}
                 >
-                  <Archive size={16} />
-                  <span>Söhbəti Bağla</span>
+                  <Trash2 size={16} />
+                  <span>Söhbəti Sil</span>
                 </button>
-              )}
+              </div>
             </div>
 
             <div className="admin-chat-messages">
