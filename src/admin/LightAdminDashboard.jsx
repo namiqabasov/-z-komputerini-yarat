@@ -84,6 +84,27 @@ export default function LightAdminDashboard({ session, onLogout }) {
     }
   };
 
+  const handleDeleteMessage = async (msgId) => {
+    if (!window.confirm("Bu mesajı silmək istədiyinizə əminsiniz?")) return;
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', msgId);
+
+      if (error) throw error;
+
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+      if (selectedMessage && selectedMessage.id === msgId) {
+        setSelectedMessage(null);
+      }
+      alert("Mesaj uğurla silindi.");
+    } catch (err) {
+      alert("Mesaj silinmə xətası: " + err.message);
+    }
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -738,6 +759,14 @@ export default function LightAdminDashboard({ session, onLogout }) {
                             onClick={() => handleToggleMessageRead(msg.id, msg.is_read)}
                           >
                             {msg.is_read ? '✉️' : '✓'}
+                          </button>
+                          <button 
+                            className="btn-reject" 
+                            title="Mesajı Sil"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}
+                          >
+                            🗑️
                           </button>
                         </div>
                       </td>
