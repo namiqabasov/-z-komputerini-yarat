@@ -4,6 +4,7 @@ import { CreditCard, Upload, CheckCircle2, AlertCircle, Copy, ShieldCheck } from
 import './PaymentModal.css';
 
 export default function PaymentModal({ session, cartItems = [], selectedParts = {}, totalPrice, onClose, onSuccess, onRequireLogin }) {
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer'); // 'bank_transfer' or 'payriff'
   const [receiptUrl, setReceiptUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -63,7 +64,7 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
       return;
     }
 
-    if (!receiptUrl) {
+    if (paymentMethod === 'bank_transfer' && !receiptUrl) {
       setErrorMsg("Lütfən ödəniş etdikdən sonra çəkin şəklini yükləyin.");
       return;
     }
@@ -97,6 +98,38 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
           }));
       }
 
+      if (paymentMethod === 'payriff') {
+        // PAYRIFF ONLINE PAYMENT (Sandbox / Integration Flow)
+        // Insert order with payriff method & status 'pending_payment'
+        const { data: newOrder, error } = await supabase
+          .from('orders')
+          .insert([{
+            user_id: session.user.id,
+            user_email: session.user.email,
+            user_name: session.user.user_metadata?.full_name || 'Müştəri',
+            items: itemsList,
+            total_price: totalPrice,
+            payment_method: 'payriff',
+            receipt_url: null,
+            status: 'pending'
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Empty user's cart
+        if (cartItems && cartItems.length > 0) {
+          await supabase.from('cart_items').delete().eq('user_id', session.user.id);
+        }
+
+        alert("🎯 [Payriff Test Sandbox]: Ödəniş sorğusu yaradıldı! Real Payriff Merchant API Key-ləri .env-ə əlavə olunan kimi avtomatik karta yönləndiriləcək.");
+        if (onSuccess) onSuccess();
+        onClose();
+        return;
+      }
+
+      // BANK TRANSFER METHOD
       const { error } = await supabase
         .from('orders')
         .insert([{
@@ -105,18 +138,16 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
           user_name: session.user.user_metadata?.full_name || 'Müştəri',
           items: itemsList,
           total_price: totalPrice,
+          payment_method: 'bank_transfer',
           receipt_url: receiptUrl,
           status: 'pending'
         }]);
 
       if (error) throw error;
 
-      // Empty user's cart in Supabase if ordered from cart
+      // Empty user's cart
       if (cartItems && cartItems.length > 0) {
-        await supabase
-          .from('cart_items')
-          .delete()
-          .eq('user_id', session.user.id);
+        await supabase.from('cart_items').delete().eq('user_id', session.user.id);
       }
 
       alert("Sifarişiniz və ödəniş çeki uğurla göndərildi! Sifarişiniz təsdiqləndikdən sonra sizə bildiriş veriləcək.");
@@ -145,67 +176,115 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
         )}
 
         <div className="payment-body">
-          {/* Bank Transfer Instructions */}
-          <div className="bank-info-box">
-            <div className="bank-info-header">
-              <CreditCard size={20} className="bank-icon" />
-              <h4>Bank Transfer Rekvizitləri</h4>
-            </div>
-            
-            <div className="bank-details">
-              <div className="detail-row">
-                <span>Bank:</span>
-                <strong>{BANK_NAME}</strong>
-              </div>
-              <div className="detail-row">
-                <span>Hesab Sahibi:</span>
-                <strong>{ACCOUNT_HOLDER}</strong>
-              </div>
-              <div className="detail-row card-num-row">
-                <span>Kart Nömrəsi:</span>
-                <div className="card-number-wrapper">
-                  <strong className="card-num">{BANK_CARD}</strong>
-                  <button className="copy-btn" onClick={handleCopyCard} title="Kopyala">
-                    <Copy size={14} />
-                    <span>{copied ? 'Kopyalandı!' : 'Kopyala'}</span>
-                  </button>
-                </div>
-              </div>
-              <div className="detail-row total-highlight">
-                <span>Ödəniləcək Məbləğ:</span>
-                <span className="pay-amount">{totalPrice?.toFixed(0)} AZN</span>
-              </div>
-            </div>
+          {/* Payment Method Selector Tabs */}
+          <div className="payment-method-tabs">
+            <button
+              type="button"
+              className={`method-tab-btn ${paymentMethod === 'bank_transfer' ? 'active' : ''}`}
+              onClick={() => setPaymentMethod('bank_transfer')}
+            >
+              <CreditCard size={18} />
+              <span>1. Bank Transferi (Çek yüklə)</span>
+            </button>
+
+            <button
+              type="button"
+              className={`method-tab-btn ${paymentMethod === 'payriff' ? 'active' : ''}`}
+              onClick={() => setPaymentMethod('payriff')}
+            >
+              <ShieldCheck size={18} />
+              <span>2. Kart ilə Onlayn (Payriff)</span>
+            </button>
           </div>
 
-          {/* Upload Receipt */}
-          <form onSubmit={handleCreateOrder} className="receipt-upload-form">
-            <div className="upload-box">
-              <label className="receipt-dropzone">
-                <Upload size={28} className="upload-icon" />
-                <span className="upload-title">Ödəniş Çekinin Şəklini Yüklə *</span>
-                <span className="upload-desc">Bank tətbiqindən ödəniş qəbzinin şəklini seçin</span>
-                <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} hidden />
-              </label>
-
-              {uploading && <p className="upload-status">Şəkil yüklənir...</p>}
-
-              {receiptUrl && (
-                <div className="receipt-preview-badge">
-                  <CheckCircle2 size={16} />
-                  <span>Çək yükləndi!</span>
+          {paymentMethod === 'bank_transfer' ? (
+            <>
+              {/* Bank Transfer Instructions */}
+              <div className="bank-info-box">
+                <div className="bank-info-header">
+                  <CreditCard size={20} className="bank-icon" />
+                  <h4>Bank Transfer Rekvizitləri</h4>
                 </div>
-              )}
-            </div>
+                
+                <div className="bank-details">
+                  <div className="detail-row">
+                    <span>Bank:</span>
+                    <strong>{BANK_NAME}</strong>
+                  </div>
+                  <div className="detail-row">
+                    <span>Hesab Sahibi:</span>
+                    <strong>{ACCOUNT_HOLDER}</strong>
+                  </div>
+                  <div className="detail-row card-num-row">
+                    <span>Kart Nömrəsi:</span>
+                    <div className="card-number-wrapper">
+                      <strong className="card-num">{BANK_CARD}</strong>
+                      <button className="copy-btn" onClick={handleCopyCard} title="Kopyala">
+                        <Copy size={14} />
+                        <span>{copied ? 'Kopyalandı!' : 'Kopyala'}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="detail-row total-highlight">
+                    <span>Ödəniləcək Məbləğ:</span>
+                    <span className="pay-amount">{totalPrice?.toFixed(0)} AZN</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="modal-footer">
-              <button type="button" className="cancel-btn" onClick={onClose}>Ləğv Et</button>
-              <button type="submit" className="save-btn" disabled={submitting || uploading}>
-                <ShieldCheck size={18} />
-                <span>{submitting ? 'Sifariş Göndərilir...' : 'Sifarişi Təsdiqlə'}</span>
-              </button>
-            </div>
-          </form>
+              {/* Upload Receipt */}
+              <form onSubmit={handleCreateOrder} className="receipt-upload-form">
+                <div className="upload-box">
+                  <label className="receipt-dropzone">
+                    <Upload size={28} className="upload-icon" />
+                    <span className="upload-title">Ödəniş Çekinin Şəklini Yüklə *</span>
+                    <span className="upload-desc">Bank tətbiqindən ödəniş qəbzinin şəklini seçin</span>
+                    <input type="file" accept="image/*" onChange={handleFileUpload} disabled={uploading} hidden />
+                  </label>
+
+                  {uploading && <p className="upload-status">Şəkil yüklənir...</p>}
+
+                  {receiptUrl && (
+                    <div className="receipt-preview-badge">
+                      <CheckCircle2 size={16} />
+                      <span>Çək yükləndi!</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" className="cancel-btn" onClick={onClose}>Ləğv Et</button>
+                  <button type="submit" className="save-btn" disabled={submitting || uploading}>
+                    <ShieldCheck size={18} />
+                    <span>{submitting ? 'Sifariş Göndərilir...' : 'Sifarişi Təsdiqlə'}</span>
+                  </button>
+                </div>
+              </form>
+            </>
+          ) : (
+            /* PAYRIFF ONLINE PAYMENT TAB CONTENT */
+            <form onSubmit={handleCreateOrder} className="payriff-form-box">
+              <div className="payriff-card-banner" style={{ background: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.3)', padding: '1.25rem', borderRadius: '12px', textAlign: 'center' }}>
+                <ShieldCheck size={36} color="#2563eb" style={{ marginBottom: '8px' }} />
+                <h4 style={{ color: 'var(--text-main)', margin: '0 0 6px 0' }}>Payriff Onlayn Kart Ödənişi</h4>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
+                  Daxili Visa / MasterCard kartlarınızla təhlükəsiz 3D-Secure ödəniş edin.
+                </p>
+                <div className="detail-row total-highlight" style={{ marginTop: '1rem', justifyContent: 'center', gap: '10px' }}>
+                  <span>Yekun Məbləğ:</span>
+                  <span className="pay-amount">{totalPrice?.toFixed(0)} AZN</span>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ marginTop: '1rem' }}>
+                <button type="button" className="cancel-btn" onClick={onClose}>Ləğv Et</button>
+                <button type="submit" className="save-btn" style={{ background: '#2563eb' }} disabled={submitting}>
+                  <CreditCard size={18} />
+                  <span>{submitting ? 'Kart Ödənişinə Yönləndirilir...' : 'Payriff İlə Ödə'}</span>
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

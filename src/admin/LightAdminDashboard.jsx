@@ -499,6 +499,7 @@ export default function LightAdminDashboard({ session, onLogout }) {
                     <th>Müştəri / Email</th>
                     <th>Komponentlər</th>
                     <th>Məbləğ</th>
+                    <th>Ödəniş Üsulu</th>
                     <th>Ödəniş Çeki</th>
                     <th>Status</th>
                     <th>Əməliyyat</th>
@@ -527,6 +528,11 @@ export default function LightAdminDashboard({ session, onLogout }) {
                         <strong className="price-text">{order.total_price} AZN</strong>
                       </td>
                       <td>
+                        <span className="item-chip" style={{ background: order.payment_method === 'payriff' ? '#eff6ff' : '#f1f5f9', color: order.payment_method === 'payriff' ? '#2563eb' : '#475569', fontWeight: '700' }}>
+                          {order.payment_method === 'payriff' ? '💳 Payriff Kart' : '🏦 Bank Transfer'}
+                        </span>
+                      </td>
+                      <td>
                         {order.receipt_url ? (
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <button className="view-receipt-btn" onClick={() => setSelectedReceipt(order.receipt_url)}>
@@ -542,7 +548,7 @@ export default function LightAdminDashboard({ session, onLogout }) {
                             </button>
                           </div>
                         ) : (
-                          <span className="no-receipt">Çek Silinib / Yoxdur</span>
+                          <span className="no-receipt">{order.payment_method === 'payriff' ? 'Onlayn Ödəniş' : 'Çek Yoxdur'}</span>
                         )}
                       </td>
                       <td>
