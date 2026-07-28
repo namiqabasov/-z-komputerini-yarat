@@ -117,4 +117,50 @@ BEGIN
         RAISE EXCEPTION 'İcazə verilmədi: Yalnız admin və ya hesab sahibi hesabı silə bilər!';
     END IF;
 END;
-$$;
+-- ===================================================
+-- 5. LIVE CHAT TABLES (Canlı Dəstək Cədvəlləri)
+-- ===================================================
+
+-- 5.1 Chat Conversations Table
+CREATE TABLE IF NOT EXISTS public.chat_conversations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    guest_name TEXT DEFAULT 'Qonaq',
+    guest_identifier TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'closed')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    last_message_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5.2 Chat Messages Table
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    conversation_id UUID NOT NULL REFERENCES public.chat_conversations(id) ON DELETE CASCADE,
+    sender TEXT NOT NULL CHECK (sender IN ('user', 'admin')),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.chat_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for chat_conversations
+CREATE POLICY "Anyone can create or view their chat conversation"
+ON public.chat_conversations FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- RLS Policies for chat_messages
+CREATE POLICY "Anyone can insert or read chat messages"
+ON public.chat_messages FOR ALL
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Enable Supabase Realtime for chat tables
+ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_conversations;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
+
