@@ -1,4 +1,6 @@
-/* Responsive Design Enhancements */
+/* Comprehensive Global Responsive Design */
+
+/* --- Tablet & Medium Screens (< 1024px) --- */
 @media (max-width: 1024px) {
   .header-container,
   main {
@@ -9,6 +11,7 @@
   .catalog-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
 
   .filter-group {
@@ -18,11 +21,66 @@
 
   .select-wrapper {
     flex: 1;
-    justify-content: space-between;
+  }
+
+  /* Admin Dashboard Layout Tablet */
+  .light-admin-layout {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .light-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem;
+  }
+
+  .sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sidebar-link {
+    width: auto;
+    flex: 1;
+    min-width: 130px;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .sidebar-footer {
+    margin-top: 0.5rem;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-chat-container {
+    flex-direction: column;
+    height: 80vh;
+  }
+
+  .admin-chat-sidebar {
+    width: 100%;
+    max-height: 220px;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
   }
 }
 
+/* --- Mobile Devices (< 768px) --- */
 @media (max-width: 768px) {
+  /* Header & Navigation */
+  .header-container {
+    padding: 0.75rem 0.85rem !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
   .brand-title {
     font-size: 1.05rem;
   }
@@ -31,33 +89,60 @@
     display: none;
   }
 
-  .hero-content h1 {
-    font-size: 1.6rem;
+  .nav-menu {
+    gap: 0.4rem;
+    overflow-x: auto;
+    width: 100%;
+    justify-content: space-between;
+    padding-bottom: 4px;
   }
 
+  .nav-btn {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.82rem;
+    gap: 0.3rem;
+  }
+
+  /* Hero & Catalog */
   .hero-banner {
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
   }
 
+  .hero-content h1 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .hero-content p {
+    font-size: 0.9rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+    gap: 1rem !important;
+  }
+
+  /* PC Builder Screen */
   .builder-header-banner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
+    text-align: center;
   }
 
   .part-slot {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.85rem;
+    gap: 0.75rem;
+    padding: 0.85rem;
   }
 
   .slot-selected-info {
     width: 100%;
-    justify-content: space-between;
-  }
-
-  .slot-icon-name {
-    min-width: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 
   .add-part-btn {
@@ -65,21 +150,101 @@
     justify-content: center;
   }
 
-  .modal-content {
-    max-height: 90vh;
+  /* Cart & Wishlist Pages */
+  .cart-item-card, .wishlist-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Admin Dashboard Mobile */
+  .light-main-content {
+    padding: 1rem;
+  }
+
+  .content-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .stats-pills {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .stats-pills button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .light-table {
+    min-width: 600px;
+  }
+
+  /* Modal Windows Responsive */
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .receipt-modal-box, .product-modal-box {
+    width: 100% !important;
+    max-height: 92vh !important;
+    padding: 1rem !important;
+    overflow-y: auto;
+  }
+
+  /* Live Chat Widget Mobile */
+  .live-chat-widget {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .chat-window-box {
+    width: calc(100vw - 30px);
+    height: 420px;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .chat-floating-btn {
+    padding: 10px 16px;
+    font-size: 0.88rem;
   }
 }
 
+/* --- Small Smartphones (< 480px) --- */
 @media (max-width: 480px) {
   .nav-btn span {
     display: none;
   }
 
   .nav-btn {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.6rem;
   }
 
   .filter-group {
     flex-direction: column;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .stat-card {
+    padding: 0.85rem !important;
+  }
+
+  .stat-title {
+    font-size: 0.75rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.1rem !important;
   }
 }
