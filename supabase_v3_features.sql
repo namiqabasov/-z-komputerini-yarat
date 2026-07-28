@@ -117,6 +117,8 @@ BEGIN
         RAISE EXCEPTION 'İcazə verilmədi: Yalnız admin və ya hesab sahibi hesabı silə bilər!';
     END IF;
 END;
+$$;
+
 -- ===================================================
 -- 5. LIVE CHAT TABLES (Canlı Dəstək Cədvəlləri)
 -- ===================================================
