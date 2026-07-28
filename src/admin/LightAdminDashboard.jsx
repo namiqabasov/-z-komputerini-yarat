@@ -197,6 +197,10 @@ export default function LightAdminDashboard({ session, onLogout }) {
     }));
   };
 
+  const last7DaysData = getLast7DaysData();
+  const categoryChartData = getCategoryChartData();
+  const recent5Orders = orders.slice(0, 5);
+
   // Delete user account profile with confirmation
   const handleDeleteUser = async (userId, userEmail) => {
     if (!window.confirm(`"${userEmail || 'İstifadəçi'}" istifadəçisini və onun bütün profil məlumatlarını silmək istədiyinizə əminsiniz?`)) return;
