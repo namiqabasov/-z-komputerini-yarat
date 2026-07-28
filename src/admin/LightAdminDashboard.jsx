@@ -197,9 +197,29 @@ export default function LightAdminDashboard({ session, onLogout }) {
     }));
   };
 
-  const last7DaysData = getLast7DaysData();
-  const categoryChartData = getCategoryChartData();
-  const recent5Orders = orders.slice(0, 5);
+  // Delete user account profile with confirmation
+  const handleDeleteUser = async (userId, userEmail) => {
+    if (!window.confirm(`"${userEmail || 'İstifadəçi'}" istifadəçisini və onun bütün profil məlumatlarını silmək istədiyinizə əminsiniz?`)) return;
+
+    try {
+      // 1. Delete user profile record
+      const { error: profileErr } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileErr) throw profileErr;
+
+      // 2. Clear related user data (cart items, wishlist, etc)
+      await supabase.from('cart_items').delete().eq('user_id', userId);
+      await supabase.from('wishlist').delete().eq('user_id', userId);
+
+      setUsersList(prev => prev.filter(u => u.id !== userId));
+      alert("İstifadəçi profil məlumatları uğurla silindi.");
+    } catch (err) {
+      alert("İstifadəçi silinmə xətası: " + err.message);
+    }
+  };
 
   return (
     <div className="light-admin-layout">
@@ -272,6 +292,7 @@ export default function LightAdminDashboard({ session, onLogout }) {
               {activeTab === 'orders' && 'Sifarişlərin İdarə Olunması'}
               {activeTab === 'products' && 'Məhsul Kataloqu'}
               {activeTab === 'users' && 'Qeydiyyatlı İstifadəçilər'}
+              {activeTab === 'messages' && 'Bizimlə Əlaqə Mesajları'}
             </h1>
             <p className="sub-text">Admin: {session?.user?.email}</p>
           </div>
@@ -572,6 +593,59 @@ export default function LightAdminDashboard({ session, onLogout }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* TAB 3: USERS SECTION */}
+        {activeTab === 'users' && (
+          <div className="table-card">
+            <div className="table-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>Qeydiyyatlı İstifadəçilər ({usersList.length})</h3>
+              <button className="refresh-btn" onClick={fetchAllData}>
+                <RefreshCw size={14} />
+                <span>Yenilə</span>
+              </button>
+            </div>
+
+            {loading ? (
+              <p className="light-loading">Yüklənir...</p>
+            ) : usersList.length === 0 ? (
+              <p className="light-empty">Hələ heç bir istifadəçi qeydiyyatdan keçməyib.</p>
+            ) : (
+              <table className="light-table">
+                <thead>
+                  <tr>
+                    <th>Ad & Soyad</th>
+                    <th>Email</th>
+                    <th>Qeydiyyat Tarixi</th>
+                    <th>Sifariş Sayı</th>
+                    <th>Əməliyyatlar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersList.map(u => {
+                    const userOrdersCount = orders.filter(o => o.user_id === u.id).length;
+                    return (
+                      <tr key={u.id}>
+                        <td><strong>{u.full_name || 'İstifadəçi'}</strong></td>
+                        <td>{u.email}</td>
+                        <td>{u.created_at ? new Date(u.created_at).toLocaleDateString('az-AZ') : '-'}</td>
+                        <td><span className="order-count-chip">{userOrdersCount} Sifariş</span></td>
+                        <td>
+                          <button 
+                            className="btn-reject" 
+                            title="İstifadəçini və məlumatlarını sil"
+                            onClick={() => handleDeleteUser(u.id, u.email || u.full_name)}
+                          >
+                            🗑️ Qeydiyyatı Sil
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
