@@ -78,7 +78,32 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
+  // Handle return from online payment gateway (e.g. Payriff return URL)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    const orderId = urlParams.get('order_id');
+
+    if (paymentStatus && orderId) {
+      if (paymentStatus === 'success') {
+        // Trigger status update call to webhook or RPC for simulated sandbox mode
+        supabase
+          .from('orders')
+          .update({ status: 'approved', payriff_transaction_id: `SIM_${Date.now()}` })
+          .eq('id', orderId)
+          .then(({ error }) => {
+            if (!error) {
+              alert(`🎉 Ödənişiniz uğurla tamamlandı! Sifariş #${orderId.substring(0, 8)} təsdiqləndi.`);
+            }
+          });
+      } else if (paymentStatus === 'canceled' || paymentStatus === 'declined') {
+        alert(`❌ Ödəniş tamamlanmadı və ya ləğv edildi. Lütfən təkrar cəhd edin.`);
+      }
+      
+      // Clean query params from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Fetch counts for Header badges (Cart count = number of DISTINCT product types/rows)
   const fetchHeaderCounts = async (currSession) => {
