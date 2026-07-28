@@ -99,8 +99,7 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
       }
 
       if (paymentMethod === 'payriff') {
-        // PAYRIFF ONLINE PAYMENT (Sandbox / Integration Flow)
-        // Insert order with payriff method & status 'pending_payment'
+        // 1. Create order record in Supabase with status 'pending'
         const { data: newOrder, error } = await supabase
           .from('orders')
           .insert([{
@@ -118,14 +117,39 @@ export default function PaymentModal({ session, cartItems = [], selectedParts = 
 
         if (error) throw error;
 
+        // 2. Call Vercel Serverless Function /api/payriff-create-order
+        const response = await fetch('/api/payriff-create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: newOrder.id,
+            amount: totalPrice,
+            description: `Sifariş #${newOrder.id.substring(0, 8)} - PC Builder`,
+            userEmail: session.user.email,
+            userName: session.user.user_metadata?.full_name || 'Müştəri'
+          })
+        });
+
+        const payriffRes = await response.json();
+
+        if (!response.ok || (payriffRes.code && payriffRes.code !== '00000')) {
+          throw new Error(payriffRes.error || payriffRes.message || "Payriff sorğusu xətası");
+        }
+
         // Empty user's cart
         if (cartItems && cartItems.length > 0) {
           await supabase.from('cart_items').delete().eq('user_id', session.user.id);
         }
 
-        alert("🎯 [Payriff Test Sandbox]: Ödəniş sorğusu yaradıldı! Real Payriff Merchant API Key-ləri .env-ə əlavə olunan kimi avtomatik karta yönləndiriləcək.");
-        if (onSuccess) onSuccess();
-        onClose();
+        const paymentUrl = payriffRes.payload?.paymentUrl || payriffRes.paymentUrl;
+        
+        if (paymentUrl) {
+          window.location.href = paymentUrl;
+        } else {
+          alert("🎯 [Payriff Test Rejimi]: Ödəniş linki yaradıldı! Real API Key-lər .env-ə yazılan kimi kart səhifəsinə yönləndiriləcək.");
+          if (onSuccess) onSuccess();
+          onClose();
+        }
         return;
       }
 
