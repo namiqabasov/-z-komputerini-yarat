@@ -303,6 +303,10 @@ export default function LiveChatWidget({ session, onRequireLogin }) {
                     <a href={msg.message.replace('[IMAGE]:', '')} target="_blank" rel="noopener noreferrer">
                       <img src={msg.message.replace('[IMAGE]:', '')} alt="Şəkil" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '4px' }} />
                     </a>
+                  ) : msg.message.startsWith('[AUDIO]:') ? (
+                    <div style={{ padding: '4px 0' }}>
+                      <audio controls src={msg.message.replace('[AUDIO]:', '')} style={{ maxWidth: '200px', height: '32px' }} />
+                    </div>
                   ) : (
                     <p>{msg.message}</p>
                   )}

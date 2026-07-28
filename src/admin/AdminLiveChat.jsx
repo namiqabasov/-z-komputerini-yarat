@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle, Trash2, RefreshCw } from 'lucide-react';
+import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle, Trash2, RefreshCw, Image as ImageIcon, Mic, Square } from 'lucide-react';
 import './AdminLiveChat.css';
 
 export default function AdminLiveChat() {
@@ -9,7 +9,15 @@ export default function AdminLiveChat() {
   const [messages, setMessages] = useState([]);
   const [adminInput, setAdminInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingTimerRef = useRef(null);
 
   // Fetch all active conversations
   const fetchConversations = async () => {
@@ -110,7 +118,137 @@ export default function AdminLiveChat() {
     };
   }, [selectedConv]);
 
-  // Admin send message
+  // Admin send image file
+  const handleAdminImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !selectedConv) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `admin_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `chat/${fileName}`;
+
+      const { error: uploadErr } = await supabase.storage.from('receipts').upload(filePath, file);
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlObj } = supabase.storage.from('receipts').getPublicUrl(filePath);
+      const imageUrl = publicUrlObj.publicUrl;
+      const imageMsgContent = `[IMAGE]:${imageUrl}`;
+
+      const { data: insertedMsg, error: msgErr } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: selectedConv.id,
+          sender: 'admin',
+          message: imageMsgContent
+        })
+        .select()
+        .single();
+
+      if (!msgErr && insertedMsg) {
+        setMessages((prev) => [...prev, insertedMsg]);
+        await supabase
+          .from('chat_conversations')
+          .update({ last_message_at: new Date().toISOString() })
+          .eq('id', selectedConv.id);
+      }
+    } catch (err) {
+      alert("Şəkil yüklənmə xətası: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Start Voice Recording (WhatsApp style)
+  const startVoiceRecording = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Sizin brauzeriniz mikrofon yazmağı dəstəkləmir.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await sendVoiceMessage(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } catch (err) {
+      alert("Mikrofona icazə verilmədi: " + err.message);
+    }
+  };
+
+  // Stop Voice Recording & Send
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      clearInterval(recordingTimerRef.current);
+    }
+  };
+
+  // Send Voice Message Blob to Storage & DB
+  const sendVoiceMessage = async (audioBlob) => {
+    if (!selectedConv) return;
+    setUploading(true);
+
+    try {
+      const fileName = `voice_${Date.now()}_${Math.random().toString(36).substring(2)}.webm`;
+      const filePath = `chat/${fileName}`;
+
+      const { error: uploadErr } = await supabase.storage.from('receipts').upload(filePath, audioBlob, {
+        contentType: 'audio/webm'
+      });
+
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlObj } = supabase.storage.from('receipts').getPublicUrl(filePath);
+      const audioUrl = publicUrlObj.publicUrl;
+      const audioMsgContent = `[AUDIO]:${audioUrl}`;
+
+      const { data: insertedMsg, error: msgErr } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: selectedConv.id,
+          sender: 'admin',
+          message: audioMsgContent
+        })
+        .select()
+        .single();
+
+      if (!msgErr && insertedMsg) {
+        setMessages((prev) => [...prev, insertedMsg]);
+        await supabase
+          .from('chat_conversations')
+          .update({ last_message_at: new Date().toISOString() })
+          .eq('id', selectedConv.id);
+      }
+    } catch (err) {
+      alert("Səs göndərmə xətası: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Admin send text message
   const handleSendAdminMessage = async (e) => {
     e.preventDefault();
     if (!adminInput.trim() || !selectedConv) return;
@@ -329,10 +467,18 @@ export default function AdminLiveChat() {
                     <a href={msg.message.replace('[IMAGE]:', '')} target="_blank" rel="noopener noreferrer">
                       <img 
                         src={msg.message.replace('[IMAGE]:', '')} 
-                        alt="İstifadəçi Şəkli" 
+                        alt="Şəkil" 
                         style={{ maxWidth: '240px', maxHeight: '240px', borderRadius: '8px', marginTop: '4px', objectFit: 'cover' }} 
                       />
                     </a>
+                  ) : msg.message.startsWith('[AUDIO]:') ? (
+                    <div style={{ padding: '4px 0' }}>
+                      <audio 
+                        controls 
+                        src={msg.message.replace('[AUDIO]:', '')} 
+                        style={{ maxWidth: '240px', height: '36px' }}
+                      />
+                    </div>
                   ) : (
                     <p>{msg.message}</p>
                   )}
@@ -345,15 +491,57 @@ export default function AdminLiveChat() {
             </div>
 
             {selectedConv.status === 'active' ? (
-              <form className="admin-chat-input-area" onSubmit={handleSendAdminMessage}>
+              <form className="admin-chat-input-area" onSubmit={handleSendAdminMessage} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  onChange={handleAdminImageUpload} 
+                />
+                
+                <button
+                  type="button"
+                  className="close-conv-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || isRecording}
+                  title="Şəkil Yüklə"
+                  style={{ background: '#f1f5f9', borderColor: '#cbd5e1', color: '#475569', padding: '0.6rem 0.8rem' }}
+                >
+                  <ImageIcon size={18} />
+                </button>
+
+                {isRecording ? (
+                  <button
+                    type="button"
+                    className="close-conv-btn"
+                    onClick={stopVoiceRecording}
+                    style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Square size={16} fill="#dc2626" />
+                    <span>Dayandır & Göndər ({recordingTime}s)</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="close-conv-btn"
+                    onClick={startVoiceRecording}
+                    disabled={uploading}
+                    title="Səsli Mesaj Yaz (WhatsApp)"
+                    style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534', padding: '0.6rem 0.8rem' }}
+                  >
+                    <Mic size={18} />
+                  </button>
+                )}
+
                 <input
                   type="text"
-                  placeholder="İstifadəçiyə cavab yazın..."
+                  placeholder={uploading ? "Fayl yüklənir..." : isRecording ? "Səs yazılır..." : "İstifadəçiyə cavab yazın..."}
                   value={adminInput}
                   onChange={(e) => setAdminInput(e.target.value)}
-                  required
+                  disabled={uploading || isRecording}
                 />
-                <button type="submit" className="admin-chat-send-btn">
+                <button type="submit" className="admin-chat-send-btn" disabled={uploading || isRecording || !adminInput.trim()}>
                   <Send size={18} />
                   <span>Göndər</span>
                 </button>
