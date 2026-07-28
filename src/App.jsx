@@ -11,6 +11,7 @@ import UserProfile from './user/UserProfile';
 import PaymentModal from './user/PaymentModal';
 import SecretAdminLogin from './admin/SecretAdminLogin';
 import LightAdminDashboard from './admin/LightAdminDashboard';
+import LiveChatWidget from './components/LiveChatWidget';
 import { supabase } from './supabaseClient';
 
 // Map URL paths to activeTab values
@@ -431,6 +432,9 @@ function App() {
           }}
         />
       )}
+
+      {/* Live Chat Widget for public pages */}
+      <LiveChatWidget session={session} />
 
       <Footer />
     </div>
