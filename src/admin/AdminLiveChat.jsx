@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle, Trash2 } from 'lucide-react';
+import { Headset, MessageSquare, Send, CheckCircle2, Archive, User, Circle, Trash2, RefreshCw } from 'lucide-react';
 import './AdminLiveChat.css';
 
 export default function AdminLiveChat() {
@@ -172,6 +172,24 @@ export default function AdminLiveChat() {
     }
   };
 
+  // Reopen conversation
+  const handleReopenConversation = async (convId) => {
+    try {
+      const { error } = await supabase
+        .from('chat_conversations')
+        .update({ status: 'active' })
+        .eq('id', convId);
+
+      if (error) throw error;
+      setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, status: 'active' } : c)));
+      if (selectedConv?.id === convId) {
+        setSelectedConv((prev) => ({ ...prev, status: 'active' }));
+      }
+    } catch (err) {
+      alert("Yenidən açma xətası: " + err.message);
+    }
+  };
+
   // Delete Conversation Completely (Purge messages and images from storage)
   const handleDeleteConversation = async (convId) => {
     if (!window.confirm("Bu söhbəti və bütün mesajlarını (şəkillər daxil) verilənlər bazasından tamamilə silmək istədiyinizə əminsiniz? Yaddaş boşaldılacaq.")) return;
@@ -271,7 +289,7 @@ export default function AdminLiveChat() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                {selectedConv.status === 'active' && (
+                {selectedConv.status === 'active' ? (
                   <button
                     className="close-conv-btn"
                     onClick={() => handleCloseConversation(selectedConv.id)}
@@ -279,6 +297,16 @@ export default function AdminLiveChat() {
                   >
                     <Archive size={16} />
                     <span>Söhbəti Bağla</span>
+                  </button>
+                ) : (
+                  <button
+                    className="close-conv-btn"
+                    onClick={() => handleReopenConversation(selectedConv.id)}
+                    title="Söhbəti Yenidən Aç"
+                    style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#15803d' }}
+                  >
+                    <RefreshCw size={16} />
+                    <span>Söhbəti Yenidən Aç</span>
                   </button>
                 )}
                 
