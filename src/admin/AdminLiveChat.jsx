@@ -160,7 +160,7 @@ export default function AdminLiveChat() {
     }
   };
 
-  // Start Voice Recording (WhatsApp style)
+  // Start Voice Recording (WhatsApp style) with mimeType compatibility fallback
   const startVoiceRecording = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert("Sizin brauzeriniz mikrofon yazmağı dəstəkləmir.");
@@ -169,17 +169,27 @@ export default function AdminLiveChat() {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+        else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+        else mimeType = '';
+      }
+
+      const options = mimeType ? { mimeType } : {};
+      mediaRecorderRef.current = new MediaRecorder(stream, options);
       audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
+        if (event.data && event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const finalType = mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: finalType });
         await sendVoiceMessage(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -192,7 +202,7 @@ export default function AdminLiveChat() {
         setRecordingTime(prev => prev + 1);
       }, 1000);
     } catch (err) {
-      alert("Mikrofona icazə verilmədi: " + err.message);
+      alert("Mikrofon icazəsi xətası: Zəhmət olmasa brauzerdə (ünvan çubuğunda) mikrofona icazə verin. (Xəta: " + err.message + ")");
     }
   };
 
