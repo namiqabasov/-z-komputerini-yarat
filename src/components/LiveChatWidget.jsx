@@ -1,29 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { MessageSquare, X, Send, User, Headset, Circle } from 'lucide-react';
+import { MessageSquare, X, Send, User, Headset, Circle, Image as ImageIcon } from 'lucide-react';
 import './LiveChatWidget.css';
 
-export default function LiveChatWidget({ session }) {
+export default function LiveChatWidget({ session, onRequireLogin }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
-  const [guestName, setGuestName] = useState('');
   const [conversation, setConversation] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  // Get or generate guest identifier stored in localStorage
-  const getGuestIdentifier = () => {
-    let id = localStorage.getItem('guest_chat_id');
-    if (!id) {
-      id = 'guest_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
-      localStorage.setItem('guest_chat_id', id);
+  // If user is not logged in, clicking chat triggers login redirect
+  const handleOpenChat = () => {
+    if (!session) {
+      if (onRequireLogin) onRequireLogin();
+      return;
     }
-    return id;
+    setIsOpen(true);
   };
-
-  const guestIdentifier = getGuestIdentifier();
 
   // Scroll to bottom of message list
   const scrollToBottom = () => {
@@ -37,18 +35,18 @@ export default function LiveChatWidget({ session }) {
     }
   }, [messages, isOpen]);
 
-  // Load or create active conversation
+  // Load or create active conversation for authenticated user
   useEffect(() => {
     async function initConversation() {
+      if (!session?.user?.id) return;
       try {
-        let query = supabase.from('chat_conversations').select('*').eq('status', 'active');
-        if (session?.user?.id) {
-          query = query.eq('user_id', session.user.id);
-        } else {
-          query = query.eq('guest_identifier', guestIdentifier);
-        }
-
-        const { data: convData, error } = await query.order('created_at', { ascending: false }).limit(1);
+        const { data: convData } = await supabase
+          .from('chat_conversations')
+          .select('*')
+          .eq('status', 'active')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
 
         if (convData && convData.length > 0) {
           setConversation(convData[0]);
@@ -79,7 +77,7 @@ export default function LiveChatWidget({ session }) {
     }
   };
 
-  // ADDIMS 4: Supabase Realtime Subscription for incoming admin messages
+  // Supabase Realtime Subscription for incoming admin messages
   useEffect(() => {
     if (!conversation?.id) return;
 
@@ -112,24 +110,19 @@ export default function LiveChatWidget({ session }) {
     };
   }, [conversation?.id, isOpen]);
 
-  // Send new message
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
+  // Handle Image File Upload to Supabase Storage
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const textToSend = inputText.trim();
-    setInputText('');
-    setLoading(true);
-
+    setUploadingImg(true);
     try {
       let currentConv = conversation;
-
-      // Create new conversation if none exists
       if (!currentConv) {
         const payload = {
-          guest_identifier: guestIdentifier,
-          guest_name: session?.user?.user_metadata?.full_name || guestName || 'İstifadəçi',
-          user_id: session?.user?.id || null,
+          guest_identifier: session?.user?.id || 'auth_user',
+          guest_name: session?.user?.user_metadata?.full_name || session?.user?.email || 'İstifadəçi',
+          user_id: session?.user?.id,
           status: 'active'
         };
 
@@ -144,7 +137,75 @@ export default function LiveChatWidget({ session }) {
         setConversation(newConv);
       }
 
-      // Optimistic message update
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `chat/${fileName}`;
+
+      // Upload image to receipts bucket or public storage bucket
+      const { error: uploadErr } = await supabase.storage.from('receipts').upload(filePath, file);
+      if (uploadErr) throw uploadErr;
+
+      const { data: publicUrlObj } = supabase.storage.from('receipts').getPublicUrl(filePath);
+      const imageUrl = publicUrlObj.publicUrl;
+
+      // Insert message containing image tag [IMAGE]:url
+      const imageMsgContent = `[IMAGE]:${imageUrl}`;
+
+      const { data: insertedMsg } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: currentConv.id,
+          sender: 'user',
+          message: imageMsgContent
+        })
+        .select()
+        .single();
+
+      if (insertedMsg) {
+        setMessages(prev => [...prev, insertedMsg]);
+        await supabase
+          .from('chat_conversations')
+          .update({ last_message_at: new Date().toISOString() })
+          .eq('id', currentConv.id);
+      }
+    } catch (err) {
+      alert("Şəkil yüklənmə xətası: " + err.message);
+    } finally {
+      setUploadingImg(false);
+    }
+  };
+
+  // Send text message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const textToSend = inputText.trim();
+    setInputText('');
+    setLoading(true);
+
+    try {
+      let currentConv = conversation;
+
+      if (!currentConv) {
+        const payload = {
+          guest_identifier: session?.user?.id || 'auth_user',
+          guest_name: session?.user?.user_metadata?.full_name || session?.user?.email || 'İstifadəçi',
+          user_id: session?.user?.id,
+          status: 'active'
+        };
+
+        const { data: newConv, error: convErr } = await supabase
+          .from('chat_conversations')
+          .insert(payload)
+          .select()
+          .single();
+
+        if (convErr) throw convErr;
+        currentConv = newConv;
+        setConversation(newConv);
+      }
+
       const tempId = 'temp_' + Date.now();
       const newMsgObj = {
         id: tempId,
@@ -156,7 +217,6 @@ export default function LiveChatWidget({ session }) {
 
       setMessages((prev) => [...prev, newMsgObj]);
 
-      // Insert message into database
       const { data: insertedMsg, error: msgErr } = await supabase
         .from('chat_messages')
         .insert({
@@ -169,7 +229,6 @@ export default function LiveChatWidget({ session }) {
 
       if (!msgErr && insertedMsg) {
         setMessages((prev) => prev.map((m) => (m.id === tempId ? insertedMsg : m)));
-        // Update conversation last_message_at timestamp
         await supabase
           .from('chat_conversations')
           .update({ last_message_at: new Date().toISOString() })
@@ -186,7 +245,7 @@ export default function LiveChatWidget({ session }) {
     <div className="live-chat-widget">
       {/* Floating Chat Trigger Button */}
       {!isOpen && (
-        <button className="chat-floating-btn" onClick={() => setIsOpen(true)} title="Canlı Dəstək">
+        <button className="chat-floating-btn" onClick={handleOpenChat} title="Canlı Dəstək">
           <Headset size={26} />
           <span>Canlı Dəstək</span>
           {unreadCount > 0 && <span className="chat-unread-badge">{unreadCount}</span>}
@@ -194,7 +253,7 @@ export default function LiveChatWidget({ session }) {
       )}
 
       {/* Floating Chat Modal Window */}
-      {isOpen && (
+      {isOpen && session && (
         <div className="chat-window-box">
           {/* Header */}
           <div className="chat-window-header">
@@ -219,7 +278,13 @@ export default function LiveChatWidget({ session }) {
             ) : (
               messages.map((msg) => (
                 <div key={msg.id} className={`chat-bubble ${msg.sender === 'user' ? 'outgoing' : 'incoming'}`}>
-                  <p>{msg.message}</p>
+                  {msg.message.startsWith('[IMAGE]:') ? (
+                    <a href={msg.message.replace('[IMAGE]:', '')} target="_blank" rel="noopener noreferrer">
+                      <img src={msg.message.replace('[IMAGE]:', '')} alt="Şəkil" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '4px' }} />
+                    </a>
+                  ) : (
+                    <p>{msg.message}</p>
+                  )}
                   <span className="msg-time">
                     {new Date(msg.created_at).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
                   </span>
@@ -231,24 +296,32 @@ export default function LiveChatWidget({ session }) {
 
           {/* Footer Form */}
           <form className="chat-window-footer" onSubmit={handleSendMessage}>
-            {!session && !conversation && (
-              <input
-                type="text"
-                className="chat-guest-name-input"
-                placeholder="Adınız (istəyə bağlı)"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-              />
-            )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleImageUpload} 
+            />
             <div className="chat-input-row">
+              <button 
+                type="button" 
+                className="chat-attach-btn" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImg}
+                title="Şəkil Yüklə"
+                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', padding: '8px 10px', cursor: 'pointer' }}
+              >
+                <ImageIcon size={18} />
+              </button>
               <input
                 type="text"
-                placeholder="Mesajınızı yazın..."
+                placeholder={uploadingImg ? "Şəkil yüklənir..." : "Mesajınızı yazın..."}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                required
+                disabled={uploadingImg}
               />
-              <button type="submit" className="chat-send-btn" disabled={loading}>
+              <button type="submit" className="chat-send-btn" disabled={loading || uploadingImg}>
                 <Send size={18} />
               </button>
             </div>

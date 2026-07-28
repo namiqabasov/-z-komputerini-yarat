@@ -241,7 +241,17 @@ export default function AdminLiveChat() {
             <div className="admin-chat-messages">
               {messages.map((msg) => (
                 <div key={msg.id} className={`admin-msg-bubble ${msg.sender === 'admin' ? 'admin' : 'user'}`}>
-                  <p>{msg.message}</p>
+                  {msg.message.startsWith('[IMAGE]:') ? (
+                    <a href={msg.message.replace('[IMAGE]:', '')} target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src={msg.message.replace('[IMAGE]:', '')} 
+                        alt="İstifadəçi Şəkli" 
+                        style={{ maxWidth: '240px', maxHeight: '240px', borderRadius: '8px', marginTop: '4px', objectFit: 'cover' }} 
+                      />
+                    </a>
+                  ) : (
+                    <p>{msg.message}</p>
+                  )}
                   <span className="admin-msg-time">
                     {new Date(msg.created_at).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}
                   </span>

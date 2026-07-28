@@ -434,7 +434,7 @@ function App() {
       )}
 
       {/* Live Chat Widget for public pages */}
-      <LiveChatWidget session={session} />
+      <LiveChatWidget session={session} onRequireLogin={() => setActiveTab('auth')} />
 
       <Footer />
     </div>

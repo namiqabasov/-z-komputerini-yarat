@@ -27,7 +27,14 @@ const CATEGORY_NAMES = {
 const PIE_COLORS = ['#2563eb', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
 
 export default function LightAdminDashboard({ session, onLogout }) {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'orders', 'products', 'users', 'messages'
+  const [activeTab, setActiveTabState] = useState(() => {
+    return localStorage.getItem('admin_active_tab') || 'overview';
+  });
+
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    localStorage.setItem('admin_active_tab', tab);
+  };
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [usersList, setUsersList] = useState([]);
