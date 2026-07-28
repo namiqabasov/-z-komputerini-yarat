@@ -1,0 +1,266 @@
+/* Admin Live Chat Styles */
+.admin-chat-container {
+  display: flex;
+  height: 75vh;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.admin-chat-sidebar {
+  width: 300px;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.sidebar-chat-header {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sidebar-chat-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.conv-item {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.conv-item:hover {
+  background: #f1f5f9;
+}
+
+.conv-item.active {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+}
+
+.conv-user-icon {
+  background: #cbd5e1;
+  color: #334155;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conv-item.active .conv-user-icon {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.conv-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.conv-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conv-top strong {
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.conv-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.conv-status-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.conv-status-badge.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.conv-status-badge.closed {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Main Area */
+.admin-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.admin-chat-topbar {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-user h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.user-id-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 2px 0 0 0;
+}
+
+.close-conv-btn {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.close-conv-btn:hover {
+  background: #fee2e2;
+}
+
+/* Messages List */
+.admin-chat-messages {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+}
+
+.admin-msg-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.admin-msg-bubble.admin {
+  align-self: flex-end;
+  background: #2563eb;
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+
+.admin-msg-bubble.user {
+  align-self: flex-start;
+  background: #f1f5f9;
+  color: #1e293b;
+  border-bottom-left-radius: 2px;
+}
+
+.admin-msg-time {
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 4px;
+  opacity: 0.75;
+  text-align: right;
+}
+
+/* Input Area */
+.admin-chat-input-area {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 10px;
+  background: #f8fafc;
+}
+
+.admin-chat-input-area input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.admin-chat-input-area input:focus {
+  border-color: #2563eb;
+}
+
+.admin-chat-send-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.admin-chat-send-btn:hover {
+  background: #1d4ed8;
+}
+
+.no-conv-selected {
+  margin: auto;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.closed-chat-bar {
+  padding: 1rem;
+  text-align: center;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-top: 1px solid #e2e8f0;
+}

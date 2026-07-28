@@ -3,13 +3,14 @@ import { supabase } from '../supabaseClient';
 import { 
   ShoppingBag, Users, Package, CheckCircle, XCircle, 
   Clock, Eye, LogOut, Search, Filter, RefreshCw, FileText,
-  BarChart2, TrendingUp, PieChart as PieIcon, Activity
+  BarChart2, TrendingUp, PieChart as PieIcon, Activity, Headset
 } from 'lucide-react';
 import { 
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
 } from 'recharts';
 import ProductModal from './ProductModal';
+import AdminLiveChat from './AdminLiveChat';
 import './LightAdminDashboard.css';
 
 const CATEGORY_NAMES = {
@@ -290,6 +291,14 @@ export default function LightAdminDashboard({ session, onLogout }) {
           </button>
 
           <button 
+            className={`sidebar-link ${activeTab === 'chat' ? 'active' : ''}`}
+            onClick={() => setActiveTab('chat')}
+          >
+            <Headset size={18} />
+            <span>Canlı Dəstək</span>
+          </button>
+
+          <button 
             className={`sidebar-link ${activeTab === 'messages' ? 'active' : ''}`}
             onClick={() => setActiveTab('messages')}
           >
@@ -317,6 +326,7 @@ export default function LightAdminDashboard({ session, onLogout }) {
               {activeTab === 'orders' && 'Sifarişlərin İdarə Olunması'}
               {activeTab === 'products' && 'Məhsul Kataloqu'}
               {activeTab === 'users' && 'Qeydiyyatlı İstifadəçilər'}
+              {activeTab === 'chat' && 'Canlı Dəstək (Live Chat)'}
               {activeTab === 'messages' && 'Bizimlə Əlaqə Mesajları'}
             </h1>
             <p className="sub-text">Admin: {session?.user?.email}</p>
@@ -682,7 +692,12 @@ export default function LightAdminDashboard({ session, onLogout }) {
           </div>
         )}
 
-        {/* TAB 4: MESSAGES SECTION */}
+        {/* TAB 4: CANLI DƏSTƏK (LIVE CHAT) SECTION */}
+        {activeTab === 'chat' && (
+          <AdminLiveChat />
+        )}
+
+        {/* TAB 5: MESSAGES SECTION */}
         {activeTab === 'messages' && (
           <div className="table-card">
             <div className="table-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
