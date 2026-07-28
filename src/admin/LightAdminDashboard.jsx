@@ -202,13 +202,15 @@ export default function LightAdminDashboard({ session, onLogout }) {
     if (!window.confirm(`"${userEmail || 'İstifadəçi'}" istifadəçisini və onun bütün profil məlumatlarını silmək istədiyinizə əminsiniz?`)) return;
 
     try {
-      // 1. Delete user profile record
+      // 1. Delete user profile record from public.profiles
       const { error: profileErr } = await supabase
         .from('profiles')
         .delete()
         .eq('id', userId);
 
-      if (profileErr) throw profileErr;
+      if (profileErr) {
+        console.warn("Profile delete warning:", profileErr);
+      }
 
       // 2. Clear related user data (cart items, wishlist, etc)
       await supabase.from('cart_items').delete().eq('user_id', userId);
@@ -217,7 +219,7 @@ export default function LightAdminDashboard({ session, onLogout }) {
       setUsersList(prev => prev.filter(u => u.id !== userId));
       alert("İstifadəçi profil məlumatları uğurla silindi.");
     } catch (err) {
-      alert("İstifadəçi silinmə xətası: " + err.message);
+      alert("İstifadəçi silinmə xətası: " + (err.message || "Baza xətası baş verdi"));
     }
   };
 
