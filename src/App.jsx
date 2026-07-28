@@ -105,6 +105,8 @@ function App() {
     }
   }, []);
 
+  const isSecretAdminRoute = activeTab === 'admin-secret' || window.location.pathname === '/admin-panel-gizli-yol';
+
   // Fetch counts for Header badges (Cart count = number of DISTINCT product types/rows)
   const fetchHeaderCounts = async (currSession) => {
     if (currSession?.user?.id) {
