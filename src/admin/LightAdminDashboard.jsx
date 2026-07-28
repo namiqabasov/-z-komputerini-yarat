@@ -121,11 +121,12 @@ export default function LightAdminDashboard({ session, onLogout }) {
     }
   };
 
-  // Delete receipt file from Storage and reset receipt_url in orders table
-  const handleDeleteReceipt = async (orderId, receiptUrl) => {
-    if (!window.confirm("Bu ödəniş çekini silmək istədiyinizə əminsiniz?")) return;
+  // Delete entire order (and its receipt if present)
+  const handleDeleteOrder = async (orderId, receiptUrl, userEmail) => {
+    if (!window.confirm(`"#${orderId.substring(0, 8)}" sifarişini və ona aid bütün məlumatları (və ödəniş çekini) tamamilə silmək istədiyinizə əminsiniz?`)) return;
 
     try {
+      // 1. Delete receipt image from Supabase Storage if exists
       if (receiptUrl) {
         const urlParts = receiptUrl.split('/receipts/');
         if (urlParts.length > 1) {
@@ -134,17 +135,18 @@ export default function LightAdminDashboard({ session, onLogout }) {
         }
       }
 
+      // 2. Delete order row from orders table
       const { error } = await supabase
         .from('orders')
-        .update({ receipt_url: null })
+        .delete()
         .eq('id', orderId);
 
       if (error) throw error;
 
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, receipt_url: null } : o));
-      alert("Ödəniş çeki silindi.");
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      alert("Sifariş uğurla silindi.");
     } catch (err) {
-      alert("Çek silinmə xətası: " + err.message);
+      alert("Sifariş silinmə xətası: " + err.message);
     }
   };
 
@@ -527,6 +529,14 @@ export default function LightAdminDashboard({ session, onLogout }) {
                             onClick={() => handleUpdateOrderStatus(order.id, 'rejected')}
                           >
                             <XCircle size={16} />
+                          </button>
+                          <button 
+                            className="btn-reject" 
+                            title="Sifarişi və Çeki Sil"
+                            onClick={() => handleDeleteOrder(order.id, order.receipt_url, order.user_email)}
+                            style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}
+                          >
+                            🗑️
                           </button>
                         </div>
                       </td>
