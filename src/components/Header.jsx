@@ -1,5 +1,5 @@
-import React from 'react';
-import { Cpu, ShoppingBag, Wrench, User, ShoppingCart, Heart, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { Cpu, ShoppingBag, Wrench, User, ShoppingCart, Heart, MessageSquare, Menu, X } from 'lucide-react';
 import './Header.css';
 
 export default function Header({ 
@@ -10,10 +10,17 @@ export default function Header({
   cartCount = 0,
   wishlistCount = 0
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleNavClick = (tab) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="app-header">
       <div className="header-container">
-        <div className="logo-section" onClick={() => setActiveTab('home')}>
+        <div className="logo-section" onClick={() => handleNavClick('home')}>
           <div className="logo-icon-wrapper">
             <Cpu className="logo-icon" size={28} />
           </div>
@@ -23,10 +30,19 @@ export default function Header({
           </div>
         </div>
 
-        <nav className="nav-menu">
+        {/* Mobile Hamburger Toggle Button */}
+        <button 
+          className="mobile-menu-toggle" 
+          onClick={() => setMobileMenuOpen(prev => !prev)}
+          aria-label="Menyu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        <nav className={`nav-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <button 
             className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveTab('home')}
+            onClick={() => handleNavClick('home')}
           >
             <ShoppingBag size={18} />
             <span>Kataloq</span>
@@ -34,7 +50,7 @@ export default function Header({
 
           <button 
             className={`nav-btn ${activeTab === 'builder' ? 'active' : ''}`}
-            onClick={() => setActiveTab('builder')}
+            onClick={() => handleNavClick('builder')}
           >
             <Wrench size={18} />
             <span>PC Builder</span>
@@ -43,7 +59,7 @@ export default function Header({
           {/* Cart Button with Count Badge */}
           <button 
             className={`nav-btn ${activeTab === 'cart' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cart')}
+            onClick={() => handleNavClick('cart')}
             style={{ position: 'relative' }}
           >
             <ShoppingCart size={18} />
@@ -56,7 +72,7 @@ export default function Header({
           {/* Wishlist Button with Count Badge */}
           <button 
             className={`nav-btn ${activeTab === 'wishlist' ? 'active' : ''}`}
-            onClick={() => setActiveTab('wishlist')}
+            onClick={() => handleNavClick('wishlist')}
             style={{ position: 'relative' }}
           >
             <Heart size={18} />
@@ -69,7 +85,7 @@ export default function Header({
           {/* Contact Us Button */}
           <button 
             className={`nav-btn ${activeTab === 'contact' ? 'active' : ''}`}
-            onClick={() => setActiveTab('contact')}
+            onClick={() => handleNavClick('contact')}
           >
             <MessageSquare size={18} />
             <span>Əlaqə</span>
@@ -78,7 +94,7 @@ export default function Header({
           {/* User Account / Auth Button */}
           <button 
             className={`nav-btn ${activeTab === 'profile' || activeTab === 'auth' ? 'active' : ''}`}
-            onClick={() => setActiveTab(session ? 'profile' : 'auth')}
+            onClick={() => handleNavClick(session ? 'profile' : 'auth')}
             disabled={authLoading}
           >
             <User size={18} />

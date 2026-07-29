@@ -67,7 +67,7 @@ export default function UserProfile({ session, onLogout }) {
             <p className="profile-email"><Mail size={14} /> {session?.user?.email}</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="profile-action-btns">
           <button 
             className="user-logout-btn" 
             style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444' }}

@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import { 
   ShoppingBag, Users, Package, CheckCircle, XCircle, 
   Clock, Eye, LogOut, Search, Filter, RefreshCw, FileText,
-  BarChart2, TrendingUp, PieChart as PieIcon, Activity, Headset
+  BarChart2, TrendingUp, PieChart as PieIcon, Activity, Headset, Menu, X
 } from 'lucide-react';
 import { 
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, 
@@ -30,10 +30,12 @@ export default function LightAdminDashboard({ session, onLogout }) {
   const [activeTab, setActiveTabState] = useState(() => {
     return localStorage.getItem('admin_active_tab') || 'overview';
   });
+  const [mobileAdminMenuOpen, setMobileAdminMenuOpen] = useState(false);
 
   const setActiveTab = (tab) => {
     setActiveTabState(tab);
     localStorage.setItem('admin_active_tab', tab);
+    setMobileAdminMenuOpen(false);
   };
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -297,8 +299,23 @@ export default function LightAdminDashboard({ session, onLogout }) {
 
   return (
     <div className="light-admin-layout">
+      {/* Mobile Admin Bar with Hamburger Toggle */}
+      <div className="admin-mobile-topbar">
+        <div className="sidebar-brand" style={{ paddingBottom: 0, marginBottom: 0, borderBottom: 'none' }}>
+          <FileText size={20} className="brand-icon" />
+          <span style={{ fontSize: '1rem' }}>Admin Panel</span>
+        </div>
+        <button 
+          className="admin-menu-toggle-btn"
+          onClick={() => setMobileAdminMenuOpen(prev => !prev)}
+        >
+          {mobileAdminMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          <span>{mobileAdminMenuOpen ? 'Bağla' : 'Menyu'}</span>
+        </button>
+      </div>
+
       {/* Sidebar Navigation */}
-      <aside className="light-sidebar">
+      <aside className={`light-sidebar ${mobileAdminMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-brand">
           <FileText size={22} className="brand-icon" />
           <span>İdarəetmə Paneli</span>
